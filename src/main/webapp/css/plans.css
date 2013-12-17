@@ -1,0 +1,84 @@
+@CHARSET "UTF-8";
+
+body, ul, li, html, div {
+	background: transparent;
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+	vertical-align: baseline;
+	word-wrap: break-word;
+}
+
+body, ul, li {
+	display: block;
+}
+
+body {
+	background-image: url(../images/scape_logo.png);
+	background-position: left;
+	background-repeat: no-repeat;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	line-height: 18px;
+	color: #0d0d0d;
+}
+
+div#header {
+	width: 100%;
+	max-width: 1280px;
+	height: 190px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	background-image: url(../images/scape_header_bg.png);
+	background-position: top left;
+	background-repeat: no-repeat;
+}
+
+div#container {
+	width: 100%;
+	max-width: 1280px;
+	height: auto;
+	margin: 0px auto 0px auto;
+	padding: 0px 0px 90px 0px;
+	background-image: url(../images/scape_content_bg.png);
+	background-position: top left;
+	background-repeat: repeat-y;
+}
+
+.menu {
+	left: 330px;
+	max-width: 895px;
+	position: absolute;
+	top: 90px;	
+}
+
+.menu li {
+	float: left;
+	list-style-type: none;
+	margin: 0px 0px 0px 5px;
+	padding: 0px 0px 0px 0px;
+	line-height: 20px;
+}
+
+.menu li a {
+	margin: 0;
+	padding: 7px 20px 7px 20px;
+	font-size: 16px;
+	color: #FFFFFF;
+	text-decoration: none;
+	text-shadow: 2px 2px 2px #333;
+}
+
+.currentItem li {
+	color: #FFFFFF;
+	background: #449fbd left top repeat;
+	-moz-box-shadow: 0 0 5px #333;
+	-webkit-box-shadow: 0 0 5px #333;
+	box-shadow: 0 0 5px #333;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+}
+

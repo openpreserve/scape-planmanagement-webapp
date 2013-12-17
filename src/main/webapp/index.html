@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" href="css/plans.css" />
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.3.custom.min.css" />
+        <script type="text/javascript" src="js/plans.js"></script>
+		<script src="js/jquery-1.9.1.js"></script>
+		<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+		<script>
+			$(document).ready(function() {  
+				createPlanOverview();
+			});  
+		</script>
+        <title>Plan Management</title>
+    </head>
+    <body>
+    	<div id="container">
+	    	<div id="header">
+	    		<div id="logo">
+	    			<a href="http://www.scape-project.eu/" title="SCAPE">
+	    				<img src="http://www.scape-project.eu/wp-content/themes/medani/images/scape_logo.png" alt="SCAPE" title="SCAPE" border="0" width="292" height="177">
+	    			</a>
+	    		</div>
+		    	<div id="menu">
+		    		<nav>
+			    		<ul id="menu" class="menu">
+			    			<li id="menu_item_1" class="menuitem"><a href="#overview">Overview</a></li>
+			    			<li id="menu_item_2" class="menuitem"><a href="#create">Upload Plan</a></li>
+			    		</ul>
+		    		</nav>
+		    	</div>
+	    	</div>
+	    	<div id="data">
+	    		<table id="data_plan">
+				    <thead>
+				        <tr>
+				            <th>Plan ID</th>
+				            <th>Plan Title</th>
+				            <th>Last Execution</th>
+				            <th>Last Execution State</th>
+				        </tr>
+				    </thead>
+				    <tbody>
+				        <tr>
+				            <td></td>
+				            <td></td>
+				            <td></td>
+				            <td></td>
+				        </tr>
+				    </tbody>
+				</table>
+	    	</div>
+    	</div>
+    </body>
+</html>
