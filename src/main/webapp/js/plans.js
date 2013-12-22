@@ -29,6 +29,21 @@ function createPlanOverview() {
 		$(xml).find('srw\\:searchretrieveresponse, searchretrieveresponse').each(function() {
 			numRecords = parseInt($(this).find('srw\\:numberofrecords, numberofrecords').first().text());
 			$('#recordcount').text('Search returned ' + numRecords + ' plan(s)');
+			var aaData = new Array();
+			var count = 0;
+			$(this).find('srw\\:record, record').each(function () {
+				var row = new Array();
+				row[0]=$(this).find('srw\\:extraRecordData, extraRecordData').first().text();
+				row[1]= 
+				row[2]=
+				row[3]=
+				aaData[count++] = row;
+			});
+			$('#data_plan').dataTable({
+                aaData : aaData,
+                iDisplayLength: 25,
+                bJQueryUI : true
+			});
 		});
 	});
 }
