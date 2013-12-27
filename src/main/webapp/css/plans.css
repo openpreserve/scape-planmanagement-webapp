@@ -82,3 +82,13 @@ div#container {
 	border-radius: 10px;
 }
 
+#data_plan {
+	width:100%;
+	font-size: 12pt;
+}
+
+.row_hover {
+	background-color: #97d1e4;
+    color: #000000;
+    cursor: pointer;
+}
