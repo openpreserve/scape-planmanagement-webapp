@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-body, ul, li, html, div {
+body, ul, li, html, div, table, tr, td, th {
 	background: transparent;
 	border: 0px;
 	margin: 0px;
@@ -82,13 +82,26 @@ div#container {
 	border-radius: 10px;
 }
 
+#data {
+	margin-left: 8px;
+	margin-right: 8px;	
+}
+
 #data_plan {
 	width:100%;
-	font-size: 12pt;
+	font-size: 11pt;
 }
 
 .row_hover {
 	background-color: #97d1e4;
     color: #000000;
     cursor: pointer;
+}
+.col_id {
+	font-weight: bold;
+}
+.col_title {
+	font-style: italic;
+}
+.col_state {
 }

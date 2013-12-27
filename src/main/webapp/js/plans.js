@@ -43,10 +43,13 @@ function createPlanOverview() {
 				iDisplayLength : 25,
 				bJQueryUI : true,
 				bAutoWidth: false,
+				aoColumnDefs: [ {sClass: "col_id", aTargets: [0]},
+				                {sClass: "col_title", aTargets: [1]},
+				                {sClass: "col_state", aTargets: [2]}],
 				aoColumns : [ {sWidth : "10%"},
                               {sWidth : "60%"},
                               {sWidth : "30%"}],
-              fnCreatedRow : 
+                fnCreatedRow : 
             	  function (n_row, row_data, data_idx){
 	                  $('td:eq(0)',n_row).parent().mouseover(function() {
 	                          $(this).addClass('row_hover');
