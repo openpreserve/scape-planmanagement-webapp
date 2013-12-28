@@ -1,8 +1,3 @@
-// init the site by requesting the plan overview from the SCAPE repo
-$(document).ready(function() {
-	createPlanOverview();
-});
-
 function retrievePlan() {
 
 }
@@ -21,6 +16,43 @@ function deletePlan() {
 
 function listPlans() {
 
+}
+
+function createPlanDetails() {
+    var numErrors = 0;
+    var numSuccesses = 0;
+
+    $.extend({
+            getUrlVars : function() {
+                    var vars = [], hash;
+                    var hashes = window.location.href.slice(
+                                    window.location.href.indexOf('?') + 1).split('&');
+                    for ( var i = 0; i < hashes.length; i++) {
+                            hash = hashes[i].split('=');
+                            vars.push(hash[0]);
+                            vars[hash[0]] = hash[1];
+                    }
+                    return vars;
+            },
+            getUrlVar : function(name) {
+                    return $.getUrlVars()[name];
+            }
+    });
+
+    var id = $.getUrlVar("id");
+    document.title = 'Plan ' + id + ' - Plan Management';
+
+	$.get('http://localhost:8080/fcrepo/rest/scape/plan/' + id, {})
+		.done(function(xml) {
+			var props = $(xml).find('plan').find('properties');
+			$('#details_id').text(id);
+			$('#details_title').text(props.attr('name'));
+			$('#details_author').text(props.attr('author'));
+			$('#details_desc').text(props.find('description').first().text());
+			$('#details_owner').text(props.find('owner').first().text());
+			$('#details_state').text(props.find('state').attr('value'));
+			
+		});
 }
 
 function createPlanOverview() {

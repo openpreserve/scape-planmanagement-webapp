@@ -9,6 +9,12 @@
 		<script src="js/jquery-ui-1.10.3.custom.js"></script>
 		<script src="js/jquery.dataTables.js"></script>
         <script type="text/javascript" src="js/plans.js"></script>
+        <script>
+	     	// init the site by requesting the plan overview from the SCAPE repo
+	        $(document).ready(function() {
+	        	createPlanOverview();
+	        });        
+        </script>
         <title>Plan Management</title>
     </head>
     <body>

@@ -105,3 +105,45 @@ div#container {
 }
 .col_state {
 }
+#details_table {
+	font-size:11pt;
+	background-color:#98d1e5;
+	-moz-border-radius: 0px 0px 15px 15px;
+	border-radius: 0px 0px 15px 15px;
+	border-width: 2px;
+	border-style: solid;
+	border-color: #1d82a4;
+	box-shadow: 2px 2px 2px 2px #cccccc;
+	padding: 0px;
+	margin: 0px;
+	margin-right: 8px;
+	margin-left: 8px;
+	border-spacing: 0px;
+}
+.fieldname {
+	color:#ffffff;
+	font-size: 11pt;
+	text-shadow: 2px 2px 2px #333;
+	padding-right: 20px;
+	padding-left: 20px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.field_data {
+	padding-right: 20px;
+	padding-left: 20px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.data_header {
+	text-align: center;
+	font-size: 12pt;
+	color:#ffffff;
+	text-shadow: 2px 2px 2px #333;
+	padding-top: 4px;
+	padding-bottom: 8px;
+	padding-left: 0px;
+	padding-right: 0px;
+	border-spacing: 0px;
+	background-color: #1d82a4;
+}
