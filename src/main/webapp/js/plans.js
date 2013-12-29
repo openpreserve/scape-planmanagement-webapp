@@ -1,3 +1,5 @@
+
+
 function retrievePlan() {
 
 }
@@ -39,10 +41,10 @@ function createPlanDetails() {
             }
     });
 
-    var id = $.getUrlVar("id");
+    var id = $.getUrlVar('id');
     document.title = 'Plan ' + id + ' - Plan Management';
 
-	$.get('http://localhost:8080/fcrepo/rest/scape/plan/' + id, {})
+	$.get(pmw_config.pmw_url + '/plan/' + id, {})
 		.done(function(xml) {
 			var props = $(xml).find('plan').find('properties');
 			$('#details_id').text(id);
@@ -56,7 +58,7 @@ function createPlanDetails() {
 }
 
 function createPlanOverview() {
-	$.get('http://localhost:8080/fcrepo/rest/scape/plan-list', {})
+	$.get(pmw_config.pmw_url + '/plan-list', {})
 		.done(function(xml) {
 			var numRecords = $(xml).filter('scape\\:plan-data-collection, plan-data-collection').attr('size');
 			$('#recordcount').text('Search returned ' + numRecords + ' plan(s)');
