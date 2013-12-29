@@ -46,14 +46,31 @@ function createPlanDetails() {
 
 	$.get(pmw_config.pmw_url + '/plan/' + id, {})
 		.done(function(xml) {
-			var props = $(xml).find('plan').find('properties');
+			var plan = $(xml).find('plan');
+			var props = plan.find('properties');
 			$('#details_id').text(id);
 			$('#details_title').text(props.attr('name'));
 			$('#details_author').text(props.attr('author'));
 			$('#details_desc').text(props.find('description').first().text());
 			$('#details_owner').text(props.find('owner').first().text());
 			$('#details_state').text(props.find('state').attr('value'));
+
+			var change = props.find('changelog');
+			$('#create_time').text(change.attr('created'));
+			$('#create_owner').text(change.attr('createdBy'));
+			$('#change_time').text(change.attr('changed'));
+			$('#change_owner').text(change.attr('changedBy'));
 			
+			var triggers = plan.find('basis').find('triggers');
+			triggers.find('trigger').each(function() {
+				$('#trigger_table').append('<label>Type</label>');
+				$('#trigger_table').append('<p>' + $(this).attr('type') + '</p>');
+				$('#trigger_table').append('<label>Description</label>');
+				$('#trigger_table').append('<p>' + $(this).attr('description') + '</p>');
+				$('#trigger_table').append('<label>Active</label>');
+				$('#trigger_table').append('<p>' + $(this).attr('active') + '</p>');
+				$('#trigger_table').append('<hr>');
+			});
 		});
 }
 

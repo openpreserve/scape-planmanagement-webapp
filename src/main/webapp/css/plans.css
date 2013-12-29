@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-body, ul, li, html, div, table, tr, td, th {
+body,ul,li,html,div,table,tr,td,th,p,h1 {
 	background: transparent;
 	border: 0px;
 	margin: 0px;
@@ -9,14 +9,11 @@ body, ul, li, html, div, table, tr, td, th {
 	word-wrap: break-word;
 }
 
-body, ul, li {
+body,ul,li {
 	display: block;
 }
 
 body {
-	background-image: url(../images/scape_logo.png);
-	background-position: left;
-	background-repeat: no-repeat;
 	padding: 0px 0px 0px 0px;
 	margin: 0px 0px 0px 0px;
 	font-family: Arial, Helvetica, sans-serif;
@@ -51,7 +48,7 @@ div#container {
 	left: 330px;
 	max-width: 895px;
 	position: absolute;
-	top: 90px;	
+	top: 90px;
 }
 
 .menu li {
@@ -84,30 +81,35 @@ div#container {
 
 #data {
 	margin-left: 8px;
-	margin-right: 8px;	
+	margin-right: 8px;
 }
 
 #data_plan {
-	width:100%;
+	width: 100%;
 	font-size: 11pt;
 }
 
 .row_hover {
 	background-color: #97d1e4;
-    color: #000000;
-    cursor: pointer;
+	color: #000000;
+	cursor: pointer;
 }
+
 .col_id {
 	font-weight: bold;
 }
+
 .col_title {
 	font-style: italic;
 }
+
 .col_state {
+	
 }
-#details_table {
-	font-size:11pt;
-	background-color:#98d1e5;
+
+.details_table {
+	font-size: 11pt;
+	background-color: #98d1e5;
 	-moz-border-radius: 0px 0px 15px 15px;
 	border-radius: 0px 0px 15px 15px;
 	border-width: 2px;
@@ -119,26 +121,36 @@ div#container {
 	margin-right: 8px;
 	margin-left: 8px;
 	border-spacing: 0px;
+	width: 30%;
+	float: left;
 }
-.fieldname {
-	color:#ffffff;
+
+.details_table label {
+	color: #ffffff;
 	font-size: 11pt;
 	text-shadow: 2px 2px 2px #333;
 	padding-right: 20px;
 	padding-left: 20px;
 	padding-top: 2px;
 	padding-bottom: 2px;
+	width: 120px;
+	float: left;
 }
-.field_data {
+
+.details_table p {
 	padding-right: 20px;
 	padding-left: 20px;
 	padding-top: 2px;
 	padding-bottom: 2px;
+	float: left;
+	margin-left: 20px;
+	width: 100%;
 }
-.data_header {
+
+.details_table h1 {
 	text-align: center;
 	font-size: 12pt;
-	color:#ffffff;
+	color: #ffffff;
 	text-shadow: 2px 2px 2px #333;
 	padding-top: 4px;
 	padding-bottom: 8px;
@@ -146,4 +158,19 @@ div#container {
 	padding-right: 0px;
 	border-spacing: 0px;
 	background-color: #1d82a4;
+}
+
+#details_container {
+	float: left;
+	width: 100%;
+}
+
+#trigger_table hr {
+	width: 100%;
+	color: #1d82a4;
+	background-color: #1d82a4;
+	border-style: solid;
+	border-width: 1px;
+	margin-top: 30px;
+	margin-bottom: 10px;
 }
