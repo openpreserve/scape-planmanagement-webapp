@@ -1,3 +1,19 @@
+$.extend({
+    getUrlVars : function() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(
+                            window.location.href.indexOf('?') + 1).split('&');
+            for ( var i = 0; i < hashes.length; i++) {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+            }
+            return vars;
+    },
+    getUrlVar : function(name) {
+            return $.getUrlVars()[name];
+    }
+});
 
 
 function retrievePlan() {
@@ -20,58 +36,75 @@ function listPlans() {
 
 }
 
+function parsePlanDetails(xml) {
+    var id = $.getUrlVar('id');
+	var plan = $(xml).find('plan');
+	var props = plan.find('properties');
+	$('#details_id').text(id);
+	$('#details_title').text(props.attr('name'));
+	$('#details_author').text(props.attr('author'));
+	$('#details_desc').text(props.find('description').first().text());
+	$('#details_owner').text(props.find('owner').first().text());
+	$('#details_state').text(props.find('state').attr('value'));
+
+	var change = props.find('changelog');
+	$('#create_time').text(change.attr('created'));
+	$('#create_owner').text(change.attr('createdBy'));
+	$('#change_time').text(change.attr('changed'));
+	$('#change_owner').text(change.attr('changedBy'));
+	
+	var triggers = plan.find('basis').find('triggers');
+	var len = triggers.find('trigger').length;
+	triggers.find('trigger').each(function(index, element) {
+		$('#trigger_table').append('<label>Type</label>');
+		$('#trigger_table').append('<p>' + $(this).attr('type') + '</p>');
+		$('#trigger_table').append('<label>Description</label>');
+		$('#trigger_table').append('<p>' + $(this).attr('description') + '</p>');
+		$('#trigger_table').append('<label>Active</label>');
+		$('#trigger_table').append('<p>' + $(this).attr('active') + '</p>');
+		if (index < len - 1) {
+			$('#trigger_table').append('<hr>');
+		}
+	});
+}
+
+function executePlan(planId) {
+	// first get the plan
+	$.get(pmw_config.pmw_url + '/plan/' + planId)
+		.done(function (planData) {
+			// now post the plan to the given execute URL
+			$.post(pmw_config.pmw_runplan_uri)
+				.done(function (data, stText, xhr) {
+					if (xhr.status != 200) {
+						alert(xhr);
+					}else{
+						alert(stText);
+					}
+				})
+				.fail(function (xhr, stText, error) {
+					alert('An error occured while trying to POST data to \n' + pmw_config.pmw_runplan_uri + '.\n\n' + xhr.statusText + " [" + xhr.status + ']\n\nPlease make sure that the settings in \'config.js\' are correct');
+				});
+		});
+}
+
 function createPlanDetails() {
     var numErrors = 0;
     var numSuccesses = 0;
-
-    $.extend({
-            getUrlVars : function() {
-                    var vars = [], hash;
-                    var hashes = window.location.href.slice(
-                                    window.location.href.indexOf('?') + 1).split('&');
-                    for ( var i = 0; i < hashes.length; i++) {
-                            hash = hashes[i].split('=');
-                            vars.push(hash[0]);
-                            vars[hash[0]] = hash[1];
-                    }
-                    return vars;
-            },
-            getUrlVar : function(name) {
-                    return $.getUrlVars()[name];
-            }
-    });
-
     var id = $.getUrlVar('id');
     document.title = 'Plan ' + id + ' - Plan Management';
-
-	$.get(pmw_config.pmw_url + '/plan/' + id, {})
-		.done(function(xml) {
-			var plan = $(xml).find('plan');
-			var props = plan.find('properties');
-			$('#details_id').text(id);
-			$('#details_title').text(props.attr('name'));
-			$('#details_author').text(props.attr('author'));
-			$('#details_desc').text(props.find('description').first().text());
-			$('#details_owner').text(props.find('owner').first().text());
-			$('#details_state').text(props.find('state').attr('value'));
-
-			var change = props.find('changelog');
-			$('#create_time').text(change.attr('created'));
-			$('#create_owner').text(change.attr('createdBy'));
-			$('#change_time').text(change.attr('changed'));
-			$('#change_owner').text(change.attr('changedBy'));
-			
-			var triggers = plan.find('basis').find('triggers');
-			triggers.find('trigger').each(function() {
-				$('#trigger_table').append('<label>Type</label>');
-				$('#trigger_table').append('<p>' + $(this).attr('type') + '</p>');
-				$('#trigger_table').append('<label>Description</label>');
-				$('#trigger_table').append('<p>' + $(this).attr('description') + '</p>');
-				$('#trigger_table').append('<label>Active</label>');
-				$('#trigger_table').append('<p>' + $(this).attr('active') + '</p>');
-				$('#trigger_table').append('<hr>');
-			});
-		});
+    var planUri = pmw_config.pmw_url + '/plan/' + id; 
+    $.ajax({
+    	type: "GET",
+    	url: planUri,
+    	data: {},
+    	dataType: "text/xml",
+    	success: function () {
+    		alert('success');
+    	}
+    });
+    
+	$.get(planUri)
+		.done(parsePlanDetails);
 }
 
 function createPlanOverview() {
