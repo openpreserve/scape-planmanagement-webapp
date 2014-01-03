@@ -155,3 +155,7 @@ function setPlanState(planId, state) {
 		}
 	});
 }
+
+function getPlan(planId) {
+	window.location = pmw_config.pmw_url + '/plan/' + planId;
+}
