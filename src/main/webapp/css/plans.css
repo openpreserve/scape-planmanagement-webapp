@@ -89,6 +89,14 @@ div#container {
 	font-size: 11pt;
 }
 
+#data_plan td {
+	vertical-align: middle;
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
 .row_hover {
 	background-color: #97d1e4;
 	color: #000000;
@@ -105,6 +113,11 @@ div#container {
 
 .col_state {
 	
+}
+
+.col_actions a {
+	margin-left: 4px;
+	margin-right: 4px;
 }
 
 .details_table {

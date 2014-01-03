@@ -15,27 +15,6 @@ $.extend({
     }
 });
 
-
-function retrievePlan() {
-
-}
-
-function createPlan() {
-
-}
-
-function updatePlan() {
-
-}
-
-function deletePlan() {
-
-}
-
-function listPlans() {
-
-}
-
 function parsePlanDetails(xml) {
     var id = $.getUrlVar('id');
 	var plan = $(xml).find('plan');
@@ -117,9 +96,18 @@ function createPlanOverview() {
 			$(xml).find('scape\\:plan-data, plan-data')
 				.each(function() {
 					var row = new Array();
-					row[0] = $(this).find('scape\\:identifier, identifier').find('scape\\:value, value').first().text();
+					var planId = $(this).find('scape\\:identifier, identifier').find('scape\\:value, value').first().text();
+					var state = $(this).find('scape\\:lifecycle-state, lifecycle-state').attr('plan-state');
+					var state_toggle = (state == 'ENABLED') ? 'DISABLED' : 'ENABLED';
+					var state_toggle_hint = (state == 'ENABLED') ? 'Disable plan execution' : 'Enable plan execution';
+					var link_state_toggle = '<a title="' + state_toggle_hint + '" href="javascript:setPlanState(\'' + planId + '\', \'' + state_toggle + '\')"><img height="20" width="20" src="images/toggle.png" /></a>';
+					var link_remove_plan = '<a title="Remove plan" href="javascript:removePlan(\'' + planId + '\')"><img height="20" width="20" src="images/delete.png" /></a>';
+					var link_exec_plan = '<a title="Execute plan" href="javascript:executePlan(\'' + planId + '\')"><img height="20" width="20" src="images/exec.png" /></a>';
+					var link_download_plan = '<a title="Download plan" href="javascript:getPlan(\'' + planId + '\')"><img height="20" width="20" src="images/download.png" /></a>';
+					row[0] = planId;
 					row[1] = $(this).attr('title');
-					row[2] = $(this).find('scape\\:lifecycle-state, lifecycle-state').attr('plan-state');
+					row[2] = state;
+					row[3] = link_download_plan + (state == 'ENABLED' ? link_exec_plan : '') + link_state_toggle + link_remove_plan;
 					aaData[count++] = row;
 				});
 			$('#data_plan').dataTable({
@@ -129,10 +117,12 @@ function createPlanOverview() {
 				bAutoWidth: false,
 				aoColumnDefs: [ {sClass: "col_id", aTargets: [0]},
 				                {sClass: "col_title", aTargets: [1]},
-				                {sClass: "col_state", aTargets: [2]}],
+				                {sClass: "col_state", aTargets: [2]},
+				                {sClass: "col_actions", aTargets: [3]}],
 				aoColumns : [ {sWidth : "10%"},
                               {sWidth : "60%"},
-                              {sWidth : "30%"}],
+                              {sWidth : "10%"},
+                              {sWidth : "20%"}],
                 fnCreatedRow : 
             	  function (n_row, row_data, data_idx){
 	                  $('td:eq(0)',n_row).parent().mouseover(function() {
@@ -143,11 +133,25 @@ function createPlanOverview() {
 	                  });
               		}
 			});
-            $('#data_plan').delegate('tbody > tr > td', 'click', function () {
+            $('#data_plan').delegate('tbody > tr > td:not(".col_actions")', 'click', function () {
                 record_id = $(this).parent().children()[0].textContent;
                 pid = $(this).parent().children()[1].textContent;
                 window.location = 'details.html?id=' + record_id;
                 });
 
 		});
+}
+
+function setPlanState(planId, state) {
+	var url = pmw_config.pmw_url + '/plan-state/' + planId + '/' + state;
+	$.ajax({
+		url: url,
+		type: 'PUT',
+		success: function () {
+			window.location = window.location;
+		},
+		fail: function () {
+			alert('HTTP Method failed');
+		}
+	});
 }
