@@ -161,7 +161,7 @@ function getPlan(planId) {
 }
 
 function deletePlan(planId) {
-	var url =  pmw_config.pmw_url + '/plan' + planId;
+	var url =  pmw_config.pmw_url + '/plan/' + planId;
 	var ret = confirm('Please click OK if you are sure you want to *delete* the plan \"' + planId + '\" ?');
 	if (ret == true) {
 		$.ajax({
@@ -195,7 +195,6 @@ function processUpload(data) {
 function startUpload(){
 	document.getElementById('upload_progress').style.visibility = 'visible';
 	reader = new FileReader();  
-	alert($("#plan_data").val());
 	reader.onloadend = function (e) {   
 		processUpload(e.target.result);  
 	};  

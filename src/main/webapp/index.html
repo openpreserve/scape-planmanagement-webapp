@@ -38,38 +38,43 @@
 		    		<nav>
 			    		<ul id="menu" class="menu">
 			    			<li id="menu_item_1" class="menuitem"><a href="#overview">Overview</a></li>
-			    			<li id="menu_item_2" class="menuitem"><a href="#create">Upload Plan</a></li>
 			    		</ul>
 		    		</nav>
 		    	</div>
 	    	</div>
 	    	<div id="data">
-				<label id="plan_id_label" for="plan_id">Plan ID:</label><br/>
-				<input id="plan_id" name="planId" type="text" /><p id="plan_id_warn">Plan ID can not be empty</p><br/>
-				<input id="plan_data" name="planData" type="file" /><br/>
-				<input id="plan_btn" type="button" value="Upload"/>
+	    		<div id="left_col">
+		    		<p id ="recordcount"></p>
+		    		<table id="data_plan">
+					    <thead>
+					        <tr>
+					            <th>Plan ID</th>
+					            <th>Plan Title</th>
+					            <th>Lifecycle State</th>
+					            <th>Actions</th>
+					        </tr>
+					    </thead>
+					    <tbody>
+					        <tr>
+					            <td></td>
+					            <td></td>
+					            <td></td>
+					            <td></td>
+					        </tr>
+					    </tbody>
+					</table>
+				</div>
+				<div id="right_col">
+		    		<div id="upload">
+		    			<h3 id="upload_title">Update/Upload Plan</h3>
+						<label id="plan_id_label" for="plan_id">Plan ID:</label><br/>
+						<input id="plan_id" name="planId" type="text" title="The Id of the Plan. Can not be emtpy! If a plan with the given ID exists the existing record will be updated."/><p id="plan_id_warn">Plan ID can not be empty</p><br/>
+						<input id="plan_data" name="planData" type="file" /><br/>
+						<input id="plan_btn" type="button" value="Upload"/>
+						<p id="upload_progress">Loading...<br/></p>
+					</div>
+				</div>
 				<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>                 
-				<p id="upload_progress">Loading...<br/></p>
-				<p id="result"></p>
-	    		<p id ="recordcount"></p>
-	    		<table id="data_plan">
-				    <thead>
-				        <tr>
-				            <th>Plan ID</th>
-				            <th>Plan Title</th>
-				            <th>Lifecycle State</th>
-				            <th>Actions</th>
-				        </tr>
-				    </thead>
-				    <tbody>
-				        <tr>
-				            <td></td>
-				            <td></td>
-				            <td></td>
-				            <td></td>
-				        </tr>
-				    </tbody>
-				</table>
 	    	</div>
     	</div>
     </body>
