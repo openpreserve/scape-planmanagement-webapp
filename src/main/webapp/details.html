@@ -21,6 +21,18 @@
 	        	$('#plan_btn').click(function () {
         			startUpload();
 	        	});
+	        	$('#enable_btn').click(function() {
+	        		setPlanState(id,'ENABLED');
+	        	});
+	        	$('#disable_btn').click(function() {
+	        		setPlanState(id,'DISABLED');
+	        	});
+	        	$('#delete_btn').click(function() {
+	        		deletePlan(id);
+	        	});
+	        	$('#execute_btn').click(function() {
+	        		executePlan(id);
+	        	});
 	        });        
 		</script>
         <title></title>
@@ -75,12 +87,25 @@
 			    </div>
 	    	</div>
 		    <div id="right_col">
-  		    		<div id="upload">
+	    		<div class="action">
+	    			<h3 id="upload_title">Execute Plan</h3>
+					<input id="execute_btn" type="button" value="Execute"/>
+				</div>
+	    		<div class="action">
+	    			<h3 id="upload_title">Enable/Disable Plan</h3>
+					<input id="enable_btn" type="button" value="Enable"/>
+					<input id="disable_btn" type="button" value="Disable"/>
+				</div>
+	    		<div class="action">
 	    			<h3 id="upload_title">Update/Plan</h3>
 					<input id="plan_id" name="planId" type="hidden"/>
 					<input id="plan_data" name="planData" type="file" /><br/>
 					<input id="plan_btn" type="button" value="Update"/>
 					<p id="upload_progress">Loading...<br/></p>
+				</div>
+	    		<div class="action">
+	    			<h3 id="upload_title">Delete Plan</h3>
+					<input id="delete_btn" type="button" value="Delete"/>
 				</div>
 		    </div>
 	    </div>

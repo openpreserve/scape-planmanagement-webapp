@@ -204,7 +204,7 @@ div#container {
 	color: orange;
 }
 
-#upload {
+.action {
 	border-width: 1px;
 	border-color: #1d82a4;
 	border-style: dashed;

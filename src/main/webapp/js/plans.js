@@ -168,7 +168,9 @@ function deletePlan(planId) {
 			url: url,
 			type: 'DELETE',
 			success: function () {
-				window.location = window.location;
+				var pos = window.location.href.lastIndexOf('/');
+				var redirect = window.location.href.substring(0, pos) + '/index.html';
+				window.location = redirect;
 			},
 			fail: function () {
 				alert('HTTP DELETE failed');
