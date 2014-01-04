@@ -195,7 +195,6 @@ function processUpload(data) {
 }
 
 function startUpload(){
-	document.getElementById('upload_progress').style.visibility = 'visible';
 	reader = new FileReader();  
 	reader.onloadend = function (e) {   
 		processUpload(e.target.result);  
