@@ -28,7 +28,7 @@ div#header {
 	height: 190px;
 	margin: 0px 0px 0px 0px;
 	padding: 0px 0px 0px 0px;
-	background-image: url(../images/scape_header_bg.png);
+	background-image: url("../images/scape_header_bg.png");
 	background-position: top left;
 	background-repeat: no-repeat;
 }
@@ -39,7 +39,7 @@ div#container {
 	height: auto;
 	margin: 0px auto 0px auto;
 	padding: 0px 0px 90px 0px;
-	background-image: url(../images/scape_content_bg.png);
+	background-image: url("../images/scape_content_bg.png");
 	background-position: top left;
 	background-repeat: repeat-y;
 }
@@ -122,7 +122,7 @@ div#container {
 }
 
 .details_table {
-	font-size: 11pt;
+	font-size: 10pt;
 	background-color: #98d1e5;
 	-moz-border-radius: 0px 0px 15px 15px;
 	border-radius: 0px 0px 15px 15px;
@@ -141,7 +141,7 @@ div#container {
 
 .details_table label {
 	color: #ffffff;
-	font-size: 11pt;
+	font-size: 10pt;
 	text-shadow: 2px 2px 2px #333;
 	padding-right: 20px;
 	padding-left: 20px;
@@ -164,7 +164,7 @@ div#container {
 
 .details_table h1 {
 	text-align: center;
-	font-size: 12pt;
+	font-size: 11pt;
 	color: #ffffff;
 	text-shadow: 2px 2px 2px #333;
 	padding-top: 4px;
@@ -203,6 +203,7 @@ div#container {
 	display: none;
 	color: orange;
 }
+
 #upload {
 	border-width: 1px;
 	border-color: #1d82a4;
@@ -225,11 +226,11 @@ div#container {
 
 #right_col {
 	margin-left: 20px;
-	float:left;
+	float: left;
 	margin-rigth: 20px;
 }
 
 #left_col {
 	width: 70%;
-	float:left;
+	float: left;
 }

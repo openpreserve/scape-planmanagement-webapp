@@ -12,9 +12,14 @@
         <script>
 	     	// init the site by requesting the plan details from the SCAPE repo
 	        $(document).ready(function() {
+	        	var id = $.getUrlVar('id');
 	        	createPlanDetails();
 	        	$('#menu_item_2').click(function() {
-	        			executePlan($.getUrlVar('id'));
+	        			executePlan(id);
+	        	});
+	        	$('#plan_id').val(id);
+	        	$('#plan_btn').click(function () {
+        			startUpload();
 	        	});
 	        });        
 		</script>
@@ -36,37 +41,49 @@
 		    		</nav>
 		    	</div>
 	    	</div>
-		    <div id="details_container">
-		    	<div class="details_table">
-		    		<h1>Plan Properties</h1>
-		    		<label>Id</label>
-		    		<p id="details_id"></p>
-		    		<label>Title</label>
-		    		<p id="details_title"></p>
-		    		<label>Owner</label>
-		    		<p id="details_owner"></p>
-		    		<label>Author</label>
-		    		<p id="details_author"></p>
-		    		<label>State</label>
-		    		<p id="details_state"></p>
-		    		<label>Description</label>
-		    		<p id="details_desc"></p>
-		    	</div>
-		    	<div class="details_table">
-		    		<h1>Changelog</h1>
-		    		<label>Timestamp</label>
-		    		<p id="create_time"></p>
-		    		<label>Created By</label>
-		    		<p id="create_owner"></p>
-		    		<label>Timestamp</label>
-		    		<p id="change_time"></p>
-		    		<label>Changed By</label>
-		    		<p id="change_owner"></p>
-		    	</div>
-		    	<div id="trigger_table" class="details_table">
-		    		<h1>Triggers</h1>
-		    	</div>
+	    	<div id="left_col">
+			    <div id="details_container">
+			    	<div class="details_table">
+			    		<h1>Plan Properties</h1>
+			    		<label>Id</label>
+			    		<p id="details_id"></p>
+			    		<label>Title</label>
+			    		<p id="details_title"></p>
+			    		<label>Owner</label>
+			    		<p id="details_owner"></p>
+			    		<label>Author</label>
+			    		<p id="details_author"></p>
+			    		<label>State</label>
+			    		<p id="details_state"></p>
+			    		<label>Description</label>
+			    		<p id="details_desc"></p>
+			    	</div>
+			    	<div class="details_table">
+			    		<h1>Changelog</h1>
+			    		<label>Timestamp</label>
+			    		<p id="create_time"></p>
+			    		<label>Created By</label>
+			    		<p id="create_owner"></p>
+			    		<label>Timestamp</label>
+			    		<p id="change_time"></p>
+			    		<label>Changed By</label>
+			    		<p id="change_owner"></p>
+			    	</div>
+			    	<div id="trigger_table" class="details_table">
+			    		<h1>Triggers</h1>
+			    	</div>
+			    </div>
 	    	</div>
+		    <div id="right_col">
+  		    		<div id="upload">
+	    			<h3 id="upload_title">Update/Plan</h3>
+					<input id="plan_id" name="planId" type="hidden"/>
+					<input id="plan_data" name="planData" type="file" /><br/>
+					<input id="plan_btn" type="button" value="Update"/>
+					<p id="upload_progress">Loading...<br/></p>
+				</div>
+		    </div>
 	    </div>
+		<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>                 
     </body>
 </html>
