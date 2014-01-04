@@ -1,11 +1,12 @@
 SCAPE Plan Management Web App
 ==============================
 
-## building
+## Building
 
 Checkout and build the WAR file or if you're using the prepacked fcrepo.war file from 
 https://github.com/openplanets/scape-fcrepo4-connector/blob/master/README_INSTALL_AND_USAGE.md
 you can use the prepackaged plans.war file provided on Google Drive:
+
 [Prepackaged War File](https://drive.google.com/file/d/0B5nd_qlYdcqyNTQtUHNiMFVJNDA/edit?usp=sharing)
 
 ```bash
