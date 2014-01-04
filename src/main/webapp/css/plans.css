@@ -189,3 +189,16 @@ div#container {
 	border-left-width: 0px;
 	border-right-width: 0px;
 }
+
+#upload_progress {
+	visibility: hidden;
+}
+
+.redborder {
+	border-color: orange;
+}
+
+#plan_id_warn {
+	display: none;
+	color: orange;
+}

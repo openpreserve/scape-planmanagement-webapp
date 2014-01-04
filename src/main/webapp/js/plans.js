@@ -101,7 +101,7 @@ function createPlanOverview() {
 					var state_toggle = (state == 'ENABLED') ? 'DISABLED' : 'ENABLED';
 					var state_toggle_hint = (state == 'ENABLED') ? 'Disable plan execution' : 'Enable plan execution';
 					var link_state_toggle = '<a title="' + state_toggle_hint + '" href="javascript:setPlanState(\'' + planId + '\', \'' + state_toggle + '\')"><img height="20" width="20" src="images/toggle.png" /></a>';
-					var link_remove_plan = '<a title="Remove plan" href="javascript:removePlan(\'' + planId + '\')"><img height="20" width="20" src="images/delete.png" /></a>';
+					var link_remove_plan = '<a title="Remove plan" href="javascript:deletePlan(\'' + planId + '\')"><img height="20" width="20" src="images/delete.png" /></a>';
 					var link_exec_plan = '<a title="Execute plan" href="javascript:executePlan(\'' + planId + '\')"><img height="20" width="20" src="images/exec.png" /></a>';
 					var link_download_plan = '<a title="Download plan" href="javascript:getPlan(\'' + planId + '\')"><img height="20" width="20" src="images/download.png" /></a>';
 					row[0] = planId;
@@ -151,11 +151,63 @@ function setPlanState(planId, state) {
 			window.location = window.location;
 		},
 		fail: function () {
-			alert('HTTP Method failed');
+			alert('HTTP PUT failed');
 		}
 	});
 }
 
 function getPlan(planId) {
 	window.location = pmw_config.pmw_url + '/plan/' + planId;
+}
+
+function deletePlan(planId) {
+	var url =  pmw_config.pmw_url + '/plan' + planId;
+	var ret = confirm('Please click OK if you are sure you want to *delete* the plan \"' + planId + '\" ?');
+	if (ret == true) {
+		$.ajax({
+			url: url,
+			type: 'DELETE',
+			success: function () {
+				window.location = window.location;
+			},
+			fail: function () {
+				alert('HTTP DELETE failed');
+			}
+		});
+	}
+}
+
+function processUpload(data) {
+	var planId = $("#plan_id").val();
+	var url = pmw_config.pmw_url + '/plan/' + planId;
+    $.ajax({
+    	url: url,
+    	type: 'PUT',
+    	data: data, 
+    	processData: false,
+    	contentType: false,
+    	success: uploadSuccess,
+    	error: uploadError
+    });
+    return true;
+}
+
+function startUpload(){
+	document.getElementById('upload_progress').style.visibility = 'visible';
+	reader = new FileReader();  
+	alert($("#plan_data").val());
+	reader.onloadend = function (e) {   
+		processUpload(e.target.result);  
+	};  
+	var input = document.getElementById('plan_data');
+	reader.readAsBinaryString(input.files[0]);  
+}
+
+function uploadSuccess(){
+	window.location = window.location;
+    return true;   
+}
+
+function uploadError(xhr, stText, error) {
+	alert('An error occured while uploading plan!\n' + stText + '\n\n' + xhr.statusText + '[' + xhr.status + ']');
 }

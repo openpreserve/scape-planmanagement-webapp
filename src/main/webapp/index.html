@@ -14,6 +14,14 @@
 	     	// init the site by requesting the plan overview from the SCAPE repo
 	        $(document).ready(function() {
 	        	createPlanOverview();
+	        	$('#plan_btn').click(function () {
+	        		if ($('#plan_id').val().trim().length==0) {
+	        			$('#plan_id').addClass('redborder');
+	        			$('#plan_id_warn').show();
+	        		} else {
+	        			startUpload();
+	        		}
+	        	});
 	        });        
         </script>
         <title>Plan Management</title>
@@ -36,6 +44,13 @@
 		    	</div>
 	    	</div>
 	    	<div id="data">
+				<label id="plan_id_label" for="plan_id">Plan ID:</label><br/>
+				<input id="plan_id" name="planId" type="text" /><p id="plan_id_warn">Plan ID can not be empty</p><br/>
+				<input id="plan_data" name="planData" type="file" /><br/>
+				<input id="plan_btn" type="button" value="Upload"/>
+				<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>                 
+				<p id="upload_progress">Loading...<br/></p>
+				<p id="result"></p>
 	    		<p id ="recordcount"></p>
 	    		<table id="data_plan">
 				    <thead>
