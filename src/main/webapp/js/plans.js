@@ -181,6 +181,9 @@ function deletePlan(planId) {
 
 function processUpload(data) {
 	var planId = $("#plan_id").val();
+	if (planId.length == 0 || planId === 'Generated UUID') {
+		planId = createUUID();
+	}
 	var url = pmw_config.pmw_url + '/plan/' + planId;
     $.ajax({
     	url: url,
@@ -211,3 +214,14 @@ function uploadSuccess(){
 function uploadError(xhr, stText, error) {
 	alert('An error occured while uploading plan!\n' + stText + '\n\n' + xhr.statusText + '[' + xhr.status + ']');
 }
+
+/* copied from the web source http://jsfiddle.net/briguy37/2MVFd/ */
+function createUUID() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
+};

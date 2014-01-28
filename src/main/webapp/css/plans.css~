@@ -205,7 +205,7 @@ div#container {
 }
 
 #plan_id {
-	color: #aaaaaa;
+	color: grey;
 }
 
 .action {
