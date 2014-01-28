@@ -204,9 +204,6 @@ div#container {
 	color: orange;
 }
 
-#plan_id {
-	color: #aaaaaa;
-}
 
 .action {
 	border-width: 1px;
@@ -237,4 +234,12 @@ div#container {
 #left_col {
 	width: 70%;
 	float: left;
+}
+
+.field_active {
+	color:#000000;
+}
+
+.field_inactive {
+	color: #aaaaaa;
 }
