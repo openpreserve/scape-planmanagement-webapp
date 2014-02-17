@@ -60,6 +60,24 @@ function executePlan(planId) {
 			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<jobRequest>\n"
 				+ planData.substring(posStart,posEnd) + "\n<plan-id>" + planId + "</plan-id>\n</jobRequest>";
 			console.log(data);
+			$.ajax({
+				url: pmw_config.pmw_runplan_uri,
+				type: "POST",
+				data: data,
+				dataType: "xml",
+				contentType: "application/xml",
+				success: function (data, stText, xhr) {
+					if (xhr.status != 200) {
+						alert(xhr);
+					}else{
+						alert(stText);
+					}
+				},
+				error: function (data, stText, xhr) {
+					alert(stText);
+				}
+				
+			});
 			$.post(pmw_config.pmw_runplan_uri)
 				.done(function (data, stText, xhr) {
 					if (xhr.status != 200) {
