@@ -57,7 +57,7 @@ function executePlan(planId) {
 				return;
 			}
 			var posEnd = planData.indexOf("</preservationActionPlan>") + 25;
-			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<job-request xmlsns="http://www.scape-project.eu/api/execution">\n"
+			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<job-request xmlsns=\"http://www.scape-project.eu/api/execution\">\n"
 				+ planData.substring(posStart,posEnd) + "\n<plan-id>" + planId + "</plan-id>\n</job-request>";
 			console.log(data);
 			$.ajax({
