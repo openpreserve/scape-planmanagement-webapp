@@ -78,18 +78,6 @@ function executePlan(planId) {
 				}
 				
 			});
-			$.post(pmw_config.pmw_runplan_uri)
-				.done(function (data, stText, xhr) {
-					if (xhr.status != 200) {
-						alert(xhr);
-					}else{
-						alert(stText);
-					}
-				})
-				.fail(function (xhr, stText, error) {
-					alert('An error occured while trying to POST data to \n' + pmw_config.pmw_runplan_uri + 
-							'.\n\n' + xhr.statusText + " [" + xhr.status + ']\n\nPlease make sure that the settings in \'config.js\' are correct');
-				});
 		}, "text");
 }
 
