@@ -49,7 +49,16 @@ function parsePlanDetails(xml) {
 
 function executePlan(planId) {
 	// first get the plan
-	$.get(pmw_config.pmw_url + '/plan/' + planId, null, function (planData) {
+	$.ajax({
+		url: pmw_config.pmw_url + '/plan/' + planId,
+		type: "GET",
+		beforeSend: function(xhr) {
+			xhr.setRequestHeader("Authorization", "Basic " + btoa(pmw_config.pmw_taverna_user + ":" + pmw_config.pmw_taverna_passwd)); 
+		},
+		error: function (data, stText, xhr) {
+			alert(stText);
+		},
+		success: function(data, stText, xhr) {
 			// now post the plan to the given execute URL
 			var posStart = planData.indexOf("<preservationActionPlan");
 			if (posStart < 0) {
@@ -57,15 +66,17 @@ function executePlan(planId) {
 				return;
 			}
 			var posEnd = planData.indexOf("</preservationActionPlan>") + 25;
-			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<job-request xmlsns=\"http://www.scape-project.eu/api/execution\">\n"
+			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<job-request xmlns=\"http://www.scape-project.eu/api/execution\">\n"
 				+ planData.substring(posStart,posEnd) + "\n<plan-id>" + planId + "</plan-id>\n</job-request>";
-			console.log(data);
 			$.ajax({
 				url: pmw_config.pmw_runplan_uri,
 				type: "POST",
 				data: data,
 				dataType: "xml",
 				contentType: "application/xml",
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " + btoa(pmw_config.pmw_taverna_user + ":" + pmw_config.pmw_taverna_passwd)); 
+				},
 				success: function (data, stText, xhr) {
 					if (xhr.status != 200) {
 						alert(xhr);
@@ -78,7 +89,8 @@ function executePlan(planId) {
 				}
 				
 			});
-		}, "text");
+		}
+	});
 }
 
 function createPlanDetails() {
