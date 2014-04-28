@@ -2,8 +2,6 @@ package scape.support;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -13,12 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.Header;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -33,37 +29,65 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class DelegateServlet extends HttpServlet {
 	private String baseURL;
 	private String targetURL;
-	private HttpClient client;
-	private HttpClientContext context;
-
-	private HttpHost getHttpHost(String url) throws URISyntaxException {
-		URI uri = new URI(url);
-		return new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+	private HttpClientBuilder builder;
+	private CredentialsProvider credentials;
+	static class PrefixStringProperties extends Properties {
+		private final String prefix;
+		public PrefixStringProperties(String prefix) {
+			this.prefix = prefix + ".";
+		}
+		@Override
+		public String get(Object key) {
+			return super.getProperty(prefix + key);
+		}
 	}
 
 	@Override
 	public void init() throws ServletException {
+		super.init();
+
+		String prefix = getInitParameter("config-prefix");
+		PrefixStringProperties p = new PrefixStringProperties(prefix);
 		try {
-			String prefix = getServletContext().getInitParameter("config-prefix");
-			Properties p = new Properties();
 			p.load(getServletContext().getResourceAsStream(
 					"/WEB-INF/scape.properties"));
-			baseURL = (String) p.get(prefix + ".servletURL.RE");
-			targetURL = (String) p.get(prefix + ".delegateURL");
-			client = HttpClientBuilder.create().build();
-			context = HttpClientContext.create();
-			String user = (String) p.get(prefix + ".username");
-			String pass = (String) p.get(prefix + ".password");
-			if (user != null && pass != null) {
-				CredentialsProvider cp = new BasicCredentialsProvider();
-				cp.setCredentials(new AuthScope(getHttpHost(targetURL)),
-						new UsernamePasswordCredentials(user, pass));
-				context.setCredentialsProvider(cp);
-			}
-		} catch (URISyntaxException | IOException e) {
+		} catch (IOException e) {
 			throw new ServletException(
 					"failed to initialize execution service configuration", e);
 		}
+
+		baseURL = p.get("servletURL.RE");
+		if (baseURL == null)
+			throw new ServletException("no property for " + prefix
+					+ ".servletURL.RE");
+
+		targetURL = p.get("delegateURL");
+		if (targetURL == null)
+			throw new ServletException("no property for " + prefix
+					+ ".delegateURL");
+
+		String user = p.get("username");
+		String pass = p.get("password");
+		if (user != null && pass != null) {
+			credentials = new BasicCredentialsProvider();
+			credentials.setCredentials(AuthScope.ANY,
+					new UsernamePasswordCredentials(user, pass));
+		} else if (user != null)
+			throw new ServletException("no property for " + prefix
+					+ ".password but " + prefix + ".username specified");
+		else if (pass != null)
+			throw new ServletException("no property for " + prefix
+					+ ".username but " + prefix + ".password specified");
+
+		builder = HttpClientBuilder.create();
+	}
+
+	private boolean isFiltered(String headerName) {
+		if ("WWW-Authenticate".equalsIgnoreCase(headerName))
+			return true;
+		if ("Authorization".equalsIgnoreCase(headerName))
+			return true;
+		return false;
 	}
 
 	protected HttpResponse delegate(HttpUriRequest request,
@@ -73,7 +97,7 @@ public class DelegateServlet extends HttpServlet {
 		Enumeration<String> names = origRequest.getHeaderNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
-			if ("WWW-Authenticate".equalsIgnoreCase(name))
+			if (isFiltered(name))
 				continue;
 			Enumeration<String> values = origRequest.getHeaders(name);
 			while (values.hasMoreElements())
@@ -81,12 +105,17 @@ public class DelegateServlet extends HttpServlet {
 		}
 
 		// Perform the request
-		HttpResponse resp = client.execute(request, context);
+		System.out.println("about to " + request.getMethod() + " to "
+				+ request.getURI());
+		HttpClientContext context = HttpClientContext.create();
+		context.setCredentialsProvider(credentials);
+		HttpResponse resp = builder.build().execute(request, context);
 
 		// Funnel back the response
 		response.setStatus(resp.getStatusLine().getStatusCode());
 		for (Header h : resp.getAllHeaders())
-			response.addHeader(h.getName(), h.getValue());
+			if (!isFiltered(h.getName()))
+				response.addHeader(h.getName(), h.getValue());
 		resp.getEntity().writeTo(response.getOutputStream());
 		return resp;
 	}

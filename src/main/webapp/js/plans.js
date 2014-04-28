@@ -16,9 +16,10 @@ $.extend({
 });
 var pmw_config = {
 	pmw_url : function() {
-		return $("#repository")[0].href + "/" + Array.prototype.slice.call(arguments).join("/");
+		return $("#repositoryService")[0].href + "/"
+				+ Array.prototype.slice.call(arguments).join("/");
 	},
-	pmw_runplan_uri : $("#execute")[0].href
+	pmw_runplan_uri : $("#executeService")[0].href
 };
 
 function parsePlanDetails(xml) {
