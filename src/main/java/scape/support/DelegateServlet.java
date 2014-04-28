@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,10 +31,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 @SuppressWarnings("serial")
 public class DelegateServlet extends HttpServlet {
-	String baseURL;
-	String targetURL;
-	HttpClient client;
-	HttpClientContext context;
+	private String baseURL;
+	private String targetURL;
+	private HttpClient client;
+	private HttpClientContext context;
 
 	private HttpHost getHttpHost(String url) throws URISyntaxException {
 		URI uri = new URI(url);
@@ -42,22 +43,26 @@ public class DelegateServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
-		baseURL = getServletContext().getInitParameter("executeServletURL");
-		targetURL = getServletContext().getInitParameter("serverInstance");
-		client = HttpClientBuilder.create().build();
-		context = HttpClientContext.create();
 		try {
-			String user = getServletContext().getInitParameter("username");
-			String pass = getServletContext().getInitParameter("password");
+			String prefix = getServletContext().getInitParameter("config-prefix");
+			Properties p = new Properties();
+			p.load(getServletContext().getResourceAsStream(
+					"/WEB-INF/scape.properties"));
+			baseURL = (String) p.get(prefix + ".servletURL.RE");
+			targetURL = (String) p.get(prefix + ".delegateURL");
+			client = HttpClientBuilder.create().build();
+			context = HttpClientContext.create();
+			String user = (String) p.get(prefix + ".username");
+			String pass = (String) p.get(prefix + ".password");
 			if (user != null && pass != null) {
 				CredentialsProvider cp = new BasicCredentialsProvider();
 				cp.setCredentials(new AuthScope(getHttpHost(targetURL)),
 						new UsernamePasswordCredentials(user, pass));
 				context.setCredentialsProvider(cp);
 			}
-		} catch (URISyntaxException e) {
+		} catch (URISyntaxException | IOException e) {
 			throw new ServletException(
-					"failed to initialize execution service credentials", e);
+					"failed to initialize execution service configuration", e);
 		}
 	}
 

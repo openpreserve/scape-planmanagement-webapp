@@ -14,6 +14,12 @@ $.extend({
             return $.getUrlVars()[name];
     }
 });
+var pmw_config = {
+	pmw_url : function() {
+		return $("#repository")[0].href + "/" + Array.prototype.slice.call(arguments).join("/");
+	},
+	pmw_runplan_uri : $("#execute")[0].href
+};
 
 function parsePlanDetails(xml) {
     var id = $.getUrlVar('id');
@@ -50,7 +56,7 @@ function parsePlanDetails(xml) {
 function executePlan(planId) {
 	// first get the plan
 	$.ajax({
-		url: pmw_config.pmw_url + '/plan/' + planId,
+		url: pmw_config.pmw_url('plan', planId),
 		type: "GET",
 		beforeSend: function(xhr) {
 			xhr.setRequestHeader("Authorization", "Basic " + btoa(pmw_config.pmw_taverna_user + ":" + pmw_config.pmw_taverna_passwd)); 
@@ -69,14 +75,11 @@ function executePlan(planId) {
 			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<job-request xmlns=\"http://www.scape-project.eu/api/execution\">\n"
 				+ planData.substring(posStart,posEnd) + "\n<plan-id>" + planId + "</plan-id>\n</job-request>";
 			$.ajax({
-				url: pmw_config.pmw_runplan_uri,
+				url: pmw_config.pmw_runplan_uri(),
 				type: "POST",
 				data: data,
 				dataType: "xml",
 				contentType: "application/xml",
-				beforeSend: function(xhr) {
-					xhr.setRequestHeader("Authorization", "Basic " + btoa(pmw_config.pmw_taverna_user + ":" + pmw_config.pmw_taverna_passwd)); 
-				},
 				success: function (data, stText, xhr) {
 					if (xhr.status != 200) {
 						alert(xhr);
@@ -98,7 +101,7 @@ function createPlanDetails() {
     var numSuccesses = 0;
     var id = $.getUrlVar('id');
     document.title = 'Plan ' + id + ' - Plan Management';
-    var planUri = pmw_config.pmw_url + '/plan/' + id; 
+    var planUri = pmw_config.pmw_url('plan', id); 
     $.ajax({
     	type: "GET",
     	url: planUri,
@@ -114,7 +117,7 @@ function createPlanDetails() {
 }
 
 function createPlanOverview() {
-	$.get(pmw_config.pmw_url + '/plan-list', {})
+	$.get(pmw_config.pmw_url('plan-list'), {})
 		.done(function(xml) {
 			var numRecords = $(xml).filter('scape\\:plan-data-collection, plan-data-collection').attr('size');
 			$('#recordcount').text('Search returned ' + numRecords + ' plan(s)');
@@ -170,7 +173,7 @@ function createPlanOverview() {
 }
 
 function setPlanState(planId, state) {
-	var url = pmw_config.pmw_url + '/plan-state/' + planId + '/' + state;
+	var url = pmw_config.pmw_url('plan-state', planId, state);
 	$.ajax({
 		url: url,
 		type: 'PUT',
@@ -184,11 +187,11 @@ function setPlanState(planId, state) {
 }
 
 function getPlan(planId) {
-	window.location = pmw_config.pmw_url + '/plan/' + planId;
+	window.location = pmw_config.pmw_url('plan', planId);
 }
 
 function deletePlan(planId) {
-	var url =  pmw_config.pmw_url + '/plan/' + planId;
+	var url =  pmw_config.pmw_url('plan', planId);
 	var ret = confirm('Please click OK if you are sure you want to *delete* the plan \"' + planId + '\" ?');
 	if (ret == true) {
 		$.ajax({
@@ -211,7 +214,7 @@ function processUpload(data) {
 	if (planId.length == 0 || planId === 'Generated UUID') {
 		planId = createUUID();
 	}
-	var url = pmw_config.pmw_url + '/plan/' + planId;
+	var url = pmw_config.pmw_url('plan', planId);
     $.ajax({
     	url: url,
     	type: 'PUT',
