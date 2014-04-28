@@ -40,6 +40,7 @@
                     <compilerArguments>
                         <endorseddirs>${endorsed.dir}</endorseddirs>
                     </compilerArguments>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -49,6 +50,13 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
+            </plugin>
+            <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-resources-plugin</artifactId>
+            	<configuration>
+            		<encoding>UTF-8</encoding>
+            	</configuration>
             </plugin>
         </plugins>
     </build>
