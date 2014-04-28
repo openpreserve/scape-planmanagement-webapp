@@ -15,7 +15,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -25,17 +29,28 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-@SuppressWarnings("serial")
+/**
+ * A simple servlet that delegates calls to another service, passing through any
+ * entities untouched. The only things it adds/removes are headers relating to
+ * authentication to the resource delegated to, as that is considered to be part
+ * of the implementation of that resource.
+ * 
+ * @author Donal Fellows
+ */
 public class DelegateServlet extends HttpServlet {
+	private static final long serialVersionUID = -9186580865272402646L;
 	private String baseURL;
 	private String targetURL;
-	private HttpClientBuilder builder;
 	private CredentialsProvider credentials;
-	static class PrefixStringProperties extends Properties {
+
+	@SuppressWarnings("serial")
+	private static class PrefixStringProperties extends Properties {
 		private final String prefix;
+
 		public PrefixStringProperties(String prefix) {
 			this.prefix = prefix + ".";
 		}
+
 		@Override
 		public String get(Object key) {
 			return super.getProperty(prefix + key);
@@ -52,19 +67,16 @@ public class DelegateServlet extends HttpServlet {
 			p.load(getServletContext().getResourceAsStream(
 					"/WEB-INF/scape.properties"));
 		} catch (IOException e) {
-			throw new ServletException(
-					"failed to initialize execution service configuration", e);
+			log("failed to initialize execution service configuration", e);
 		}
 
 		baseURL = p.get("servletURL.RE");
 		if (baseURL == null)
-			throw new ServletException("no property for " + prefix
-					+ ".servletURL.RE");
+			log("no property for " + prefix + ".servletURL.RE");
 
 		targetURL = p.get("delegateURL");
 		if (targetURL == null)
-			throw new ServletException("no property for " + prefix
-					+ ".delegateURL");
+			log("no property for " + prefix + ".delegateURL");
 
 		String user = p.get("username");
 		String pass = p.get("password");
@@ -73,13 +85,11 @@ public class DelegateServlet extends HttpServlet {
 			credentials.setCredentials(AuthScope.ANY,
 					new UsernamePasswordCredentials(user, pass));
 		} else if (user != null)
-			throw new ServletException("no property for " + prefix
-					+ ".password but " + prefix + ".username specified");
+			log("no property for " + prefix + ".password but " + prefix
+					+ ".username specified");
 		else if (pass != null)
-			throw new ServletException("no property for " + prefix
-					+ ".username but " + prefix + ".password specified");
-
-		builder = HttpClientBuilder.create();
+			log("no property for " + prefix + ".username but " + prefix
+					+ ".password specified");
 	}
 
 	private boolean isFiltered(String headerName) {
@@ -90,7 +100,7 @@ public class DelegateServlet extends HttpServlet {
 		return false;
 	}
 
-	protected HttpResponse delegate(HttpUriRequest request,
+	HttpResponse delegate(HttpUriRequest request,
 			HttpServletRequest origRequest, HttpServletResponse response)
 			throws IOException {
 		// Copy across the request headers
@@ -105,49 +115,72 @@ public class DelegateServlet extends HttpServlet {
 		}
 
 		// Perform the request
-		System.out.println("about to " + request.getMethod() + " to "
-				+ request.getURI());
+		log("about to " + request.getMethod() + " to " + request.getURI());
 		HttpClientContext context = HttpClientContext.create();
 		context.setCredentialsProvider(credentials);
-		HttpResponse resp = builder.build().execute(request, context);
+		HttpResponse resp = HttpClientBuilder.create().build()
+				.execute(request, context);
 
 		// Funnel back the response
 		response.setStatus(resp.getStatusLine().getStatusCode());
 		for (Header h : resp.getAllHeaders())
 			if (!isFiltered(h.getName()))
 				response.addHeader(h.getName(), h.getValue());
-		resp.getEntity().writeTo(response.getOutputStream());
+		if (resp.getEntity() != null)
+			resp.getEntity().writeTo(response.getOutputStream());
 		return resp;
 	}
 
-	protected String getRealTargetUrl(HttpServletRequest request) {
+	String getRealTargetUrl(HttpServletRequest request) {
 		String url = request.getRequestURI().replaceFirst(baseURL, targetURL);
 		if (request.getQueryString() != null)
 			url += "?" + request.getQueryString();
 		return url;
 	}
 
+	HttpEntityEnclosingRequestBase setSubmitEntity(
+			HttpEntityEnclosingRequestBase operation, HttpServletRequest request)
+			throws IOException {
+		operation.setEntity(new InputStreamEntity(request.getInputStream(),
+				ContentType.parse(request.getContentType())));
+		return operation;
+	}
+
 	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+	protected void doHead(HttpServletRequest req, HttpServletResponse resp)
+			throws MalformedURLException, IOException {
+		delegate(new HttpHead(getRealTargetUrl(req)), req, resp);
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws MalformedURLException, IOException {
 		delegate(new HttpGet(getRealTargetUrl(req)), req, resp);
 	}
 
 	@Override
-	public void doPut(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-		HttpPut put = new HttpPut(getRealTargetUrl(req));
-		put.setEntity(new InputStreamEntity(req.getInputStream(), ContentType
-				.parse(req.getContentType())));
-		delegate(put, req, resp);
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
+			throws MalformedURLException, IOException {
+		delegate(new HttpOptions(getRealTargetUrl(req)), req, resp);
 	}
 
 	@Override
-	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
+			throws MalformedURLException, IOException {
+		delegate(new HttpDelete(getRealTargetUrl(req)), req, resp);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		HttpPost post = new HttpPost(getRealTargetUrl(req));
-		post.setEntity(new InputStreamEntity(req.getInputStream(), ContentType
-				.parse(req.getContentType())));
-		delegate(post, req, resp);
+		delegate(setSubmitEntity(new HttpPut(getRealTargetUrl(req)), req), req,
+				resp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		delegate(setSubmitEntity(new HttpPost(getRealTargetUrl(req)), req),
+				req, resp);
 	}
 }
