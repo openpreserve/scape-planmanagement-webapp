@@ -1,9 +1,13 @@
 package scape.support;
 
+import static java.util.Collections.unmodifiableSet;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,9 +15,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -42,6 +48,14 @@ public class DelegateServlet extends HttpServlet {
 	private String baseURL;
 	private String targetURL;
 	private CredentialsProvider credentials;
+	private static final Set<String> FILTERED_HEADERS;
+	static {
+		Set<String> h = new HashSet<>();
+		h.add("Content-Length".toLowerCase());
+		h.add("WWW-Authenticate".toLowerCase());
+		h.add("Authorization".toLowerCase());
+		FILTERED_HEADERS = unmodifiableSet(h);
+	}
 
 	@SuppressWarnings("serial")
 	private static class PrefixStringProperties extends Properties {
@@ -77,6 +91,8 @@ public class DelegateServlet extends HttpServlet {
 		targetURL = p.get("delegateURL");
 		if (targetURL == null)
 			log("no property for " + prefix + ".delegateURL");
+		log("will delegate requests by replacing " + baseURL + " with "
+				+ targetURL);
 
 		String user = p.get("username");
 		String pass = p.get("password");
@@ -93,17 +109,25 @@ public class DelegateServlet extends HttpServlet {
 	}
 
 	private boolean isFiltered(String headerName) {
-		if ("WWW-Authenticate".equalsIgnoreCase(headerName))
-			return true;
-		if ("Authorization".equalsIgnoreCase(headerName))
-			return true;
-		return false;
+		return headerName == null
+				|| FILTERED_HEADERS.contains(headerName.toLowerCase());
 	}
 
-	HttpResponse delegate(HttpUriRequest request,
-			HttpServletRequest origRequest, HttpServletResponse response)
-			throws IOException {
+	void delegate(HttpUriRequest request, HttpServletRequest origRequest,
+			HttpServletResponse response) throws IOException {
 		// Copy across the request headers
+		copyAcrossRequestHeaders(request, origRequest);
+
+		// Perform the request
+		log("about to " + request.getMethod() + " to " + request.getURI());
+		HttpResponse resp = performDelegatedRequest(request);
+
+		// Funnel back the response
+		copyBackResponse(response, resp);
+	}
+
+	private void copyAcrossRequestHeaders(HttpUriRequest request,
+			HttpServletRequest origRequest) {
 		Enumeration<String> names = origRequest.getHeaderNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
@@ -113,22 +137,24 @@ public class DelegateServlet extends HttpServlet {
 			while (values.hasMoreElements())
 				request.addHeader(name, values.nextElement());
 		}
+	}
 
-		// Perform the request
-		log("about to " + request.getMethod() + " to " + request.getURI());
+	private HttpResponse performDelegatedRequest(HttpUriRequest request)
+			throws IOException, ClientProtocolException {
 		HttpClientContext context = HttpClientContext.create();
 		context.setCredentialsProvider(credentials);
-		HttpResponse resp = HttpClientBuilder.create().build()
-				.execute(request, context);
+		return HttpClientBuilder.create().build().execute(request, context);
+	}
 
-		// Funnel back the response
+	private void copyBackResponse(HttpServletResponse response,
+			HttpResponse resp) throws IOException {
 		response.setStatus(resp.getStatusLine().getStatusCode());
 		for (Header h : resp.getAllHeaders())
 			if (!isFiltered(h.getName()))
 				response.addHeader(h.getName(), h.getValue());
-		if (resp.getEntity() != null)
-			resp.getEntity().writeTo(response.getOutputStream());
-		return resp;
+		HttpEntity entity = resp.getEntity();
+		if (entity != null)
+			entity.writeTo(response.getOutputStream());
 	}
 
 	String getRealTargetUrl(HttpServletRequest request) {
