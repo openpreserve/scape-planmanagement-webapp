@@ -120,7 +120,12 @@ public class DelegateServlet extends HttpServlet {
 
 		// Perform the request
 		log("about to " + request.getMethod() + " to " + request.getURI());
+		for (Header h : request.getAllHeaders())
+			log("header   " + h.getName() + ": " + h.getValue());
 		HttpResponse resp = performDelegatedRequest(request);
+		log("received response: " + resp.getStatusLine());
+		for (Header h : resp.getAllHeaders())
+			log("header   " + h.getName() + ": " + h.getValue());
 
 		// Funnel back the response
 		copyBackResponse(response, resp);
