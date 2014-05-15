@@ -54,6 +54,7 @@ public class DelegateServlet extends HttpServlet {
 		h.add("Content-Length".toLowerCase());
 		h.add("WWW-Authenticate".toLowerCase());
 		h.add("Authorization".toLowerCase());
+		h.add("Host".toLowerCase());
 		FILTERED_HEADERS = unmodifiableSet(h);
 	}
 
