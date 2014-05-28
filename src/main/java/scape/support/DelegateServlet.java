@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -47,7 +48,7 @@ public class DelegateServlet extends HttpServlet {
 	private static final long serialVersionUID = -9186580865272402646L;
 	private String baseURL;
 	private String targetURL;
-	private CredentialsProvider credentials;
+	private String user, pass;
 	private static final Set<String> FILTERED_HEADERS;
 	static {
 		Set<String> h = new HashSet<>();
@@ -70,6 +71,13 @@ public class DelegateServlet extends HttpServlet {
 		public String get(Object key) {
 			return super.getProperty(prefix + key);
 		}
+	}
+
+	private CredentialsProvider getCredentials() {
+		CredentialsProvider credentials = new BasicCredentialsProvider();
+		credentials.setCredentials(AuthScope.ANY,
+				new UsernamePasswordCredentials(user, pass));
+		return credentials;
 	}
 
 	@Override
@@ -98,9 +106,8 @@ public class DelegateServlet extends HttpServlet {
 		String user = p.get("username");
 		String pass = p.get("password");
 		if (user != null && pass != null) {
-			credentials = new BasicCredentialsProvider();
-			credentials.setCredentials(AuthScope.ANY,
-					new UsernamePasswordCredentials(user, pass));
+			this.user = user;
+			this.pass = pass;
 		} else if (user != null)
 			log("no property for " + prefix + ".password but " + prefix
 					+ ".username specified");
@@ -148,17 +155,20 @@ public class DelegateServlet extends HttpServlet {
 	private HttpResponse performDelegatedRequest(HttpUriRequest request)
 			throws IOException, ClientProtocolException {
 		HttpClientContext context = HttpClientContext.create();
-		context.setCredentialsProvider(credentials);
+		context.setCredentialsProvider(getCredentials());
 		return HttpClientBuilder.create().build().execute(request, context);
 	}
 
 	private void copyBackResponse(HttpServletResponse response,
 			HttpResponse resp) throws IOException {
-		response.setStatus(resp.getStatusLine().getStatusCode());
+		int code = resp.getStatusLine().getStatusCode();
+		HttpEntity entity = resp.getEntity();
+		if (code == 401)
+			code = 500;
 		for (Header h : resp.getAllHeaders())
 			if (!isFiltered(h.getName()))
 				response.addHeader(h.getName(), h.getValue());
-		HttpEntity entity = resp.getEntity();
+		response.setStatus(code);
 		if (entity != null)
 			entity.writeTo(response.getOutputStream());
 	}
@@ -173,8 +183,13 @@ public class DelegateServlet extends HttpServlet {
 	HttpEntityEnclosingRequestBase setSubmitEntity(
 			HttpEntityEnclosingRequestBase operation, HttpServletRequest request)
 			throws IOException {
-		operation.setEntity(new InputStreamEntity(request.getInputStream(),
-				ContentType.parse(request.getContentType())));
+		String type = request.getContentType();
+		if (type == null)
+			type = request.getHeader("Content-Type");
+		if (type == null)
+			type = "application/octet-stream";
+		operation.setEntity(new BufferedHttpEntity(new InputStreamEntity(
+				request.getInputStream(), ContentType.parse(type))));
 		return operation;
 	}
 
