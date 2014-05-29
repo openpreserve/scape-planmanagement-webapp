@@ -90,8 +90,8 @@ function executePlan(planId) {
 						alert(stText);
 					}
 				},
-				error: function (data, stText, xhr) {
-					alert(stText);
+				error: function (xhr, statusText, error) {
+					alert(xhr.statusText);
 				}
 			});
 		}
