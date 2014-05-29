@@ -57,30 +57,30 @@ function parsePlanDetails(xml) {
 }
 
 function executePlan(planId) {
+	var EXECNS = "http://www.scape-project.eu/api/execution";
 	// first get the plan
 	$.ajax({
 		url: pmw_config.repository('plan', planId),
 		type: "GET",
-		beforeSend: function(xhr) {
-			xhr.setRequestHeader("Authorization", "Basic " + btoa(pmw_config.pmw_taverna_user + ":" + pmw_config.pmw_taverna_passwd)); 
-		},
 		error: function (data, stText, xhr) {
 			alert(stText);
 		},
 		success: function(data, stText, xhr) {
 			// now post the plan to the given execute URL
-			var posStart = planData.indexOf("<preservationActionPlan");
-			if (posStart < 0) {
+			var actionPlans = $(data).find("preservationActionPlan");
+			if (actionPlans.length == 0) {
 				alert("Plan can not be executed, since it has no <preservationActionPlan> element");
 				return;
 			}
-			var posEnd = planData.indexOf("</preservationActionPlan>") + 25;
-			var data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<job-request xmlns=\"http://www.scape-project.eu/api/execution\">\n"
-				+ planData.substring(posStart,posEnd) + "\n<plan-id>" + planId + "</plan-id>\n</job-request>";
+			var jobreq = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'
+					+ '<job-request xmlns="' + EXECNS + '">'
+					+ (new XMLSerializer()).serializeToString(actionPlans[0])
+					+ '<plan-id>' + planId + '</plan-id>'
+					+ '</job-request>';
 			$.ajax({
 				url: pmw_config.executor(),
 				type: "POST",
-				data: data,
+				data: jobreq,
 				dataType: "xml",
 				contentType: "application/xml",
 				success: function (data, stText, xhr) {
@@ -93,7 +93,6 @@ function executePlan(planId) {
 				error: function (data, stText, xhr) {
 					alert(stText);
 				}
-				
 			});
 		}
 	});
