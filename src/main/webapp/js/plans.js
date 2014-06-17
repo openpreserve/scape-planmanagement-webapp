@@ -83,15 +83,19 @@ function executePlan(planId) {
 				data: jobreq,
 				dataType: "xml",
 				contentType: "application/xml",
-				success: function (data, stText, xhr) {
+				success: function (content, statusText, xhr) {
 					if (xhr.status != 200) {
-						alert(xhr);
-					}else{
-						alert(stText);
+						console.log(xhr.getAllResponseHeaders());
 					}
+					alert("success at starting execution");
 				},
 				error: function (xhr, statusText, error) {
-					alert(xhr.statusText);
+					if (xhr.responseText != null)
+						alert(xhr.responseText);
+					else if (xhr.statusText != null)
+						alert(xhr.statusText);
+					else
+						alert(error);
 				}
 			});
 		}
@@ -121,15 +125,19 @@ function createPlanDetails() {
 function createPlanOverview() {
 	$.get(pmw_config.repository('plan-list'), {})
 		.done(function(xml) {
-			var numRecords = $(xml).filter('scape\\:plan-data-collection, plan-data-collection').attr('size');
+			function SCAPENODE(name) {
+				// HACKTASTIC!
+				return "scape\\:" + name + ", ns2\\:" + name + ", " + name;
+			}
+			var numRecords = $(xml).filter(SCAPENODE('plan-data-collection')).attr('size');
 			$('#recordcount').text('Search returned ' + numRecords + ' plan(s)');
 			var aaData = new Array();
 			var count = 0;
-			$(xml).find('scape\\:plan-data, plan-data')
+			$(xml).find(SCAPENODE('plan-data'))
 				.each(function() {
 					var row = new Array();
-					var planId = $(this).find('scape\\:identifier, identifier').find('scape\\:value, value').first().text();
-					var state = $(this).find('scape\\:lifecycle-state, lifecycle-state').attr('plan-state');
+					var planId = $(this).find(SCAPENODE('identifier')).find(SCAPENODE('value')).first().text();
+					var state = $(this).find(SCAPENODE('lifecycle-state')).attr('plan-state');
 					var state_toggle = (state == 'ENABLED') ? 'DISABLED' : 'ENABLED';
 					var state_toggle_hint = (state == 'ENABLED') ? 'Disable plan execution' : 'Enable plan execution';
 					var link_state_toggle = '<a title="' + state_toggle_hint + '" href="javascript:setPlanState(\'' + planId + '\', \'' + state_toggle + '\')"><img height="20" width="20" src="images/toggle.png" /></a>';

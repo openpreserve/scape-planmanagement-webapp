@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -46,7 +47,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class DelegateServlet extends HttpServlet {
 	private static final long serialVersionUID = -9186580865272402646L;
-	private String baseURL;
+	private Pattern baseURLpattern;
 	private String targetURL;
 	private String user, pass;
 	private static final Set<String> FILTERED_HEADERS;
@@ -60,16 +61,27 @@ public class DelegateServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("serial")
-	private static class PrefixStringProperties extends Properties {
+	private class PrefixStringProperties extends Properties {
 		private final String prefix;
 
 		public PrefixStringProperties(String prefix) {
+			if (prefix == null)
+				throw new IllegalArgumentException("prefix is null");
 			this.prefix = prefix + ".";
 		}
 
 		@Override
 		public String get(Object key) {
-			return super.getProperty(prefix + key);
+			String result = super.getProperty(prefix + key);
+			if (result == null) {
+				log("no property for " + prefix + key);
+				throw new RuntimeException("no key for " + prefix + key);
+			}
+			return result;
+		}
+
+		public void load(String resource) throws IOException {
+			this.load(getServletContext().getResourceAsStream(resource));
 		}
 	}
 
@@ -87,20 +99,20 @@ public class DelegateServlet extends HttpServlet {
 		String prefix = getInitParameter("config-prefix");
 		PrefixStringProperties p = new PrefixStringProperties(prefix);
 		try {
-			p.load(getServletContext().getResourceAsStream(
-					"/WEB-INF/scape.properties"));
+			p.load("/WEB-INF/scape.properties");
 		} catch (IOException e) {
 			log("failed to initialize execution service configuration", e);
+			throw new ServletException(e);
 		}
 
-		baseURL = p.get("servletURL.RE");
-		if (baseURL == null)
+		baseURLpattern = Pattern.compile(p.get("servletURL.RE"));
+		if (baseURLpattern == null)
 			log("no property for " + prefix + ".servletURL.RE");
 
 		targetURL = p.get("delegateURL");
 		if (targetURL == null)
 			log("no property for " + prefix + ".delegateURL");
-		log("will delegate requests by replacing " + baseURL + " with "
+		log("will delegate requests by replacing " + baseURLpattern + " with "
 				+ targetURL);
 
 		String user = p.get("username");
@@ -136,9 +148,10 @@ public class DelegateServlet extends HttpServlet {
 			log("header   " + h.getName() + ": " + h.getValue());
 
 		// Funnel back the response
-		copyBackResponse(response, resp);
+		copyBackResponse(origRequest, response, resp);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void copyAcrossRequestHeaders(HttpUriRequest request,
 			HttpServletRequest origRequest) {
 		Enumeration<String> names = origRequest.getHeaderNames();
@@ -159,8 +172,8 @@ public class DelegateServlet extends HttpServlet {
 		return HttpClientBuilder.create().build().execute(request, context);
 	}
 
-	private void copyBackResponse(HttpServletResponse response,
-			HttpResponse resp) throws IOException {
+	private void copyBackResponse(HttpServletRequest request,
+			HttpServletResponse response, HttpResponse resp) throws IOException {
 		int code = resp.getStatusLine().getStatusCode();
 		HttpEntity entity = resp.getEntity();
 		if (code == 401)
@@ -174,7 +187,8 @@ public class DelegateServlet extends HttpServlet {
 	}
 
 	String getRealTargetUrl(HttpServletRequest request) {
-		String url = request.getRequestURI().replaceFirst(baseURL, targetURL);
+		String url = baseURLpattern.matcher(request.getRequestURI())
+				.replaceFirst(targetURL);
 		if (request.getQueryString() != null)
 			url += "?" + request.getQueryString();
 		return url;
