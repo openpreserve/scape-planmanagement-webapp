@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="SCAPE-PLAN-MANAGEMENT-GUI" version="2.5">
+	<display-name>SCAPE Plan Management GUI</display-name>
+
+	<servlet>
+		<display-name>SCAPE Execution Service Delegate</display-name>
+		<servlet-name>execution-delegate</servlet-name>
+		<servlet-class>scape.support.DelegateServlet</servlet-class>
+		<init-param>
+			<param-name>config-prefix</param-name>
+			<param-value>execute</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<display-name>SCAPE Repository Delegate</display-name>
+		<servlet-name>repository-delegate</servlet-name>
+		<servlet-class>scape.support.DelegateServlet</servlet-class>
+		<init-param>
+			<param-name>config-prefix</param-name>
+			<param-value>repository</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>execution-delegate</servlet-name>
+		<url-pattern>/execute/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>repository-delegate</servlet-name>
+		<url-pattern>/repository/*</url-pattern>
+	</servlet-mapping>
+</web-app>

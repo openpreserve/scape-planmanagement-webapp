@@ -20,7 +20,7 @@ $ mvn clean install
 
 Check and update the settings in the file `src/main/webapp/js/config.js`
 ```bash
-$ vim src/main/webapp/js/config.js
+$ vim src/main/webapp/WEB-INF/scape.properties
 ```
 
 ## Installation
