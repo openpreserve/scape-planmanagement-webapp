@@ -18,10 +18,23 @@ $ mvn clean install
 
 ## Configuration
 
-Check and update the settings in the file `src/main/webapp/js/config.js`
+Check and update the settings in the file `src/main/webapp/WEB-INF/scape.properties`
 ```bash
 $ vim src/main/webapp/WEB-INF/scape.properties
 ```
+
+The comments in the file are mostly self-explanatory; however, to be clear:
+
+ * `repository.delegateURL` indicates the URL of the REST interface of the repository storing the Preservation Plans.
+
+ * `repository.username` and `repository.password` give the credentials to use to contact the Preservation Plan repository.
+
+ * `execute.delegateURL` indicates the URL of the REST interface of the SCAPE execution service instance.
+
+ * `execute.username` and `execute.password` give the credentials to use to contact the SCAPE execution service instance.
+
+Note that the contents of the `scape.properties` file are _not_ readable by clients; users
+cannot read the credentials to either service.
 
 ## Installation
 
