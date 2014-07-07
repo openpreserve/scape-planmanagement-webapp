@@ -111,7 +111,10 @@ function createPlanDetails() {
 		var id = $.getUrlVar('id'), plan = $(xml).find('plan'), props = plan.find('properties'),
 			change = props.find('changelog'),
 			triggers = plan.find('basis').find('triggers'),
-			len = triggers.find('trigger').length;
+			len = triggers.find('trigger').length,
+			p = function(txt) {
+				return $("<p>").text(txt);
+			};
 		$('#details_id').text(id);
 		$('#details_title').text(props.attr('name'));
 		$('#details_author').text(props.attr('author'));
@@ -129,11 +132,11 @@ function createPlanDetails() {
 
 		triggers.find('trigger').each(function(index, element) {
 			$('#trigger_table').append('<label>Type</label>');
-			$('#trigger_table').append('<p>' + $(this).attr('type') + '</p>');
+			$('#trigger_table').append(p($(this).attr('type')));
 			$('#trigger_table').append('<label>Description</label>');
-			$('#trigger_table').append('<p>' + $(this).attr('description') + '</p>');
+			$('#trigger_table').append(p($(this).attr('description')));
 			$('#trigger_table').append('<label>Active</label>');
-			$('#trigger_table').append('<p>' + $(this).attr('active') + '</p>');
+			$('#trigger_table').append(p($(this).attr('active')));
 			if (index < len - 1) {
 				$('#trigger_table').append('<hr>');
 			}
@@ -150,22 +153,15 @@ function createPlanOverview() {
 			return "scape\\:" + name + ", ns2\\:" + name + ", " + name;
 		}
 		function btn(image, title, action, id) {
-			if (typeof id != 'undefined')
-				return ('<a id="'
-						+ id
-						+ '" title="'
-						+ title
-						+ '" href="javascript:'
-						+ action
-						+ '"><img height="20" width="20" src="images/'
-						+ image + '" /></a>');
-			else
-				return ('<a title="'
-						+ title
-						+ '" href="javascript:'
-						+ action
-						+ '"><img height="20" width="20" src="images/'
-						+ image + '" /></a>');
+			return $("<a>", {
+				title: title,
+				href: "javascript:" + action
+			}).append($("<img>", {
+				height: 20,
+				width: 20,
+				src: "images/" + image,
+				id: id
+			}))[0].outerHTML;
 		}
 		function de(state) {
 			return (state ? "ENABLED" : "DISABLED");
@@ -205,10 +201,10 @@ function createPlanOverview() {
 			              {sWidth : "10%"},
 			              {sWidth : "20%"}],
 			fnCreatedRow : function (n_row, row_data, data_idx){
-				$('td:eq(0)',n_row).parent().mouseover(function() {
+				$('td:eq(0)', n_row).parent().mouseover(function() {
 					$(this).addClass('row_hover');
 				});
-				$('td:eq(0)',n_row).parent().mouseout(function() {
+				$('td:eq(0)', n_row).parent().mouseout(function() {
 					$(this).removeClass('row_hover');
 				});
 			}
