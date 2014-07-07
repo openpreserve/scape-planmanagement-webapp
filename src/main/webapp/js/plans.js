@@ -25,30 +25,36 @@ var pmw_config = {
 };
 
 /** Mark the UI as busy */
-function startProgress() {
+function startProgress(id) {
+	if (id != undefined) {
+		$("#"+id).attr("src", "images/busy.gif");
+	}
 	$("body").css("cursor", "progress");
 }
 /** Mark the UI as ready for user interaction */
-function finishProgress() {
+function finishProgress(id) {
+	if (id != undefined) {
+		$("#"+id).attr("src", "images/exec.png");
+	}
 	$("body").css("cursor", "default");
 }
 
 function executePlan(planId) {
-	startProgress();
+	startProgress("exec_" + planId);
 	var EXECNS = "http://www.scape-project.eu/api/execution";
 	// first get the plan
 	$.ajax({
 		url: pmw_config.repository('plan', planId),
 		type: "GET",
 		error: function (data, stText, xhr) {
-			finishProgress();
+			finishProgress("exec_" + planId);
 			alert(stText);
 		},
 		success: function(data, stText, xhr) {
 			// now post the plan to the given execute URL
 			var actionPlans = $(data).find("preservationActionPlan"), jobreq;
 			if (actionPlans.length == 0) {
-				finishProgress();
+				finishProgress("exec_" + planId);
 				alert("Plan can not be executed, since it has no <preservationActionPlan> element");
 				return;
 			}
@@ -64,14 +70,14 @@ function executePlan(planId) {
 				dataType: "xml",
 				contentType: "application/xml",
 				success: function (content, statusText, xhr) {
-					finishProgress();
+					finishProgress("exec_" + planId);
 					if (xhr.status != 200) {
 						console.log(xhr.getAllResponseHeaders());
 					}
 					alert("success at starting execution");
 				},
 				error: function (xhr, statusText, error) {
-					finishProgress();
+					finishProgress("exec_" + planId);
 					if (xhr.responseText != null)
 						alert(xhr.responseText);
 					else if (xhr.statusText != null)
@@ -143,13 +149,23 @@ function createPlanOverview() {
 			// HACKTASTIC!
 			return "scape\\:" + name + ", ns2\\:" + name + ", " + name;
 		}
-		function btn(image, title, action) {
-			return ('<a title="'
-					+ title
-					+ '" href="javascript:'
-					+ action
-					+ '"><img height="20" width="20" src="images/'
-					+ image + '" /></a>');
+		function btn(image, title, action, id) {
+			if (typeof id != 'undefined')
+				return ('<a id="'
+						+ id
+						+ '" title="'
+						+ title
+						+ '" href="javascript:'
+						+ action
+						+ '"><img height="20" width="20" src="images/'
+						+ image + '" /></a>');
+			else
+				return ('<a title="'
+						+ title
+						+ '" href="javascript:'
+						+ action
+						+ '"><img height="20" width="20" src="images/'
+						+ image + '" /></a>');
 		}
 		function de(state) {
 			return (state ? "ENABLED" : "DISABLED");
@@ -167,7 +183,7 @@ function createPlanOverview() {
 				html_state = btn("toggle.png", state_toggle_hint,
 						"setPlanState('" + planId + "','" + state_toggle + "')"),
 				html_del = btn("delete.png", "Remove plan", "deletePlan('" + planId + "')"),
-				html_exec = btn("exec.png", "Execute plan", "executePlan('" + planId + "')"),
+				html_exec = btn("exec.png", "Execute plan", "executePlan('" + planId + "')", "exec_" + planId),
 				html_download = btn("download.png", "Download plan", "getPlan('"+planId+"')");
 			row[0] = planId;
 			row[1] = $(this).attr('title');
