@@ -151,6 +151,9 @@ function createPlanOverview() {
 					+ '"><img height="20" width="20" src="images/'
 					+ image + '" /></a>');
 		}
+		function de(state) {
+			return (state ? "ENABLED" : "DISABLED");
+		}
 		var numRecords = $(xml).filter(SCAPENODE('plan-data-collection')).attr('size'),
 			aaData = new Array(),
 			count = 0;
@@ -160,7 +163,7 @@ function createPlanOverview() {
 				planId = $(this).find(SCAPENODE('identifier')).find(SCAPENODE('value')).first().text(),
 				state = ($(this).find(SCAPENODE('lifecycle-state')).attr('plan-state') == 'ENABLED'),
 				state_toggle_hint = (state ? 'Disable plan execution' : 'Enable plan execution'),
-				state_toggle = (state ? 'DISABLED' : 'ENABLED'),
+				state_toggle = de(!state),
 				html_state = btn("toggle.png", state_toggle_hint,
 						"setPlanState('" + planId + "','" + state_toggle + "')"),
 				html_del = btn("delete.png", "Remove plan", "deletePlan('" + planId + "')"),
@@ -168,8 +171,8 @@ function createPlanOverview() {
 				html_download = btn("download.png", "Download plan", "getPlan('"+planId+"')");
 			row[0] = planId;
 			row[1] = $(this).attr('title');
-			row[2] = state;
-			row[3] = html_download + (state == 'ENABLED' ? html_exec : '') + html_state + html_del;
+			row[2] = de(state);
+			row[3] = html_download + (state ? html_exec : '') + html_state + html_del;
 			aaData[count++] = row;
 		});
 		$('#data_plan').dataTable({
