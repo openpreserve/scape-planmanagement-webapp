@@ -43,50 +43,45 @@ function executePlan(planId) {
 	startProgress("exec_" + planId);
 	var EXECNS = "http://www.scape-project.eu/api/execution";
 	// first get the plan
-	$.ajax({
-		url: pmw_config.repository('plan', planId),
-		type: "GET",
-		error: function (data, stText, xhr) {
+	$.get(pmw_config.repository('plan', planId)).fail(function (data, stText, xhr) {
+		finishProgress("exec_" + planId);
+		alert(stText);
+	}).done(function(data, stText, xhr) {
+		// now post the plan to the given execute URL
+		var actionPlans = $(data).find("preservationActionPlan"), jobreq;
+		if (actionPlans.length == 0) {
 			finishProgress("exec_" + planId);
-			alert(stText);
-		},
-		success: function(data, stText, xhr) {
-			// now post the plan to the given execute URL
-			var actionPlans = $(data).find("preservationActionPlan"), jobreq;
-			if (actionPlans.length == 0) {
-				finishProgress("exec_" + planId);
-				alert("Plan can not be executed, since it has no <preservationActionPlan> element");
-				return;
-			}
-			jobreq = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'
-					+ '<job-request xmlns="' + EXECNS + '">'
-					+ (new XMLSerializer()).serializeToString(actionPlans[0])
-					+ '<plan-id>' + planId + '</plan-id>'
-					+ '</job-request>';
-			$.ajax({
-				url: pmw_config.executor(),
-				type: "POST",
-				data: jobreq,
-				dataType: "xml",
-				contentType: "application/xml",
-				success: function (content, statusText, xhr) {
-					finishProgress("exec_" + planId);
-					if (xhr.status != 200) {
-						console.log(xhr.getAllResponseHeaders());
-					}
-					alert("success at starting execution");
-				},
-				error: function (xhr, statusText, error) {
-					finishProgress("exec_" + planId);
-					if (xhr.responseText != null)
-						alert(xhr.responseText);
-					else if (xhr.statusText != null)
-						alert(xhr.statusText);
-					else
-						alert(error);
-				}
-			});
+			alert("Plan can not be executed, since it has no <preservationActionPlan> element");
+			return;
 		}
+		jobreq = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'
+			+ '<job-request xmlns="' + EXECNS + '">'
+			+ (new XMLSerializer()).serializeToString(actionPlans[0])
+			+ '<plan-id>' + planId + '</plan-id>'
+			+ '</job-request>';
+		$.ajax({
+			url: pmw_config.executor(),
+			type: "POST",
+			data: jobreq,
+			dataType: "xml",
+			contentType: "application/xml",
+			success: function (content, statusText, xhr) {
+				if (xhr.status != 200) {
+					console.log(xhr.getAllResponseHeaders());
+				}
+				alert("success at starting execution");
+			},
+			error: function (xhr, statusText, error) {
+				if (xhr.responseText != null)
+					alert(xhr.responseText);
+				else if (xhr.statusText != null)
+					alert(xhr.statusText);
+				else
+					alert(error);
+			}
+		}).always(function(){
+			finishProgress("exec_" + planId);
+		});
 	});
 }
 
@@ -114,7 +109,8 @@ function createPlanDetails() {
 			len = triggers.find('trigger').length,
 			p = function(txt) {
 				return $("<p>").text(txt);
-			};
+			},
+			table = $('#trigger_table');
 		$('#details_id').text(id);
 		$('#details_title').text(props.attr('name'));
 		$('#details_author').text(props.attr('author'));
@@ -131,16 +127,17 @@ function createPlanDetails() {
 		$('#change_owner').text(change.attr('changedBy'));
 
 		triggers.find('trigger').each(function(index, element) {
-			$('#trigger_table').append('<label>Type</label>');
-			$('#trigger_table').append(p($(this).attr('type')));
-			$('#trigger_table').append('<label>Description</label>');
-			$('#trigger_table').append(p($(this).attr('description')));
-			$('#trigger_table').append('<label>Active</label>');
-			$('#trigger_table').append(p($(this).attr('active')));
+			table.append('<label>Type</label>',
+					p($(this).attr('type')),
+					'<label>Description</label>',
+					p($(this).attr('description')),
+					'<label>Active</label>',
+					p($(this).attr('active')));
 			if (index < len - 1) {
-				$('#trigger_table').append('<hr>');
+				table.append('<hr>');
 			}
 		});
+	}).always(function() {
 		finishProgress();
 	});
 }
@@ -215,6 +212,9 @@ function createPlanOverview() {
 			pid = $(this).parent().children()[1].textContent;
 			window.location = 'details.html?id=' + record_id;
 		});
+	}).fail(function(handle, status){
+		alert("failed to retrieve list of plans: " + status);
+	}).always(function() {
 		finishProgress();
 	});
 }
@@ -241,25 +241,24 @@ function getPlan(planId) {
 }
 
 function deletePlan(planId) {
-	var url =  pmw_config.repository('plan', planId),
-		ret = confirm('Please click OK if you are sure you want to *delete* the plan \"' + planId + '\" ?');
-	if (ret == true) {
-		startProgress();
-		$.ajax({
-			url: url,
-			type: 'DELETE',
-			success: function () {
-				finishProgress();
-				var pos = window.location.href.lastIndexOf('/'),
-					redirect = window.location.href.substring(0, pos) + '/index.html';
-				window.location = redirect;
-			},
-			fail: function () {
-				finishProgress();
-				alert('HTTP DELETE failed');
-			}
-		});
-	}
+	if (!confirm('Please click OK if you are sure you want to *delete* the plan \"'
+			+ planId + '\" ?'))
+		return;
+
+	startProgress();
+	$.ajax({
+		url: pmw_config.repository('plan', planId),
+		type: 'DELETE',
+		success: function () {
+			finishProgress();
+			var loc = window.location.href;
+			window.location = loc.substring(0, loc.lastIndexOf('/')) + '/index.html';
+		},
+		fail: function () {
+			finishProgress();
+			alert('HTTP DELETE failed');
+		}
+	});
 }
 
 function startUpload() {
