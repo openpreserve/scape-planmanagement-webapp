@@ -243,3 +243,8 @@ div#container {
 .field_inactive {
 	color: #aaaaaa;
 }
+nav {
+	position:relative;
+	top: -180px;
+	left: -100px;
+}
