@@ -189,6 +189,7 @@ div#container {
 	border-bottom-width: 0px;
 	border-left-width: 0px;
 	border-right-width: 0px;
+	display:inline-block;
 }
 
 #upload_progress {
@@ -243,6 +244,7 @@ div#container {
 .field_inactive {
 	color: #aaaaaa;
 }
+
 nav {
 	position:relative;
 	top: -180px;
