@@ -45,6 +45,7 @@ div#container {
 }
 
 .menu {
+	margin-left:100px;
 	left: 330px;
 	max-width: 895px;
 	position: absolute;
@@ -52,7 +53,7 @@ div#container {
 }
 
 .menu li {
-	float: left;
+	float: right;
 	list-style-type: none;
 	margin: 0px 0px 0px 5px;
 	padding: 0px 0px 0px 0px;
@@ -159,7 +160,6 @@ div#container {
 	margin-bottom: 10px;
 	float: left;
 	margin-left: 20px;
-	width: 100%;
 }
 
 .details_table h1 {
@@ -189,6 +189,7 @@ div#container {
 	border-bottom-width: 0px;
 	border-left-width: 0px;
 	border-right-width: 0px;
+	display:inline-block;
 }
 
 #upload_progress {
@@ -242,4 +243,10 @@ div#container {
 
 .field_inactive {
 	color: #aaaaaa;
+}
+
+nav {
+	position:relative;
+	top: -180px;
+	left: -100px;
 }
