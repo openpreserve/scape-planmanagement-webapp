@@ -40,7 +40,8 @@ function finishProgress(id) {
 }
 function select(context, xpath) {
 	var ns = {
-		'scape': 'http://scape-project.eu/model'
+		'scape': 'http://scape-project.eu/model',
+		'plato': 'http://ifs.tuwien.ac.at/dp/plato'
 	};
 	return document.evaluate(xpath, context, function(prefix) {
 		return ns[prefix] || null;
@@ -51,20 +52,20 @@ function executePlan(planId) {
 	startProgress("exec_" + planId);
 	var EXECNS = "http://www.scape-project.eu/api/execution";
 	// first get the plan
-	$.get(pmw_config.repository('plan', planId) + "?noData=true").fail(function (data, stText, xhr) {
+	$.get(pmw_config.repository('plan', planId)).fail(function (data, stText, xhr) {
 		finishProgress("exec_" + planId);
 		alert(stText);
 	}).done(function(data, stText, xhr) {
 		// now post the plan to the given execute URL
-		var actionPlans = $(data).find("preservationActionPlan"), jobreq;
-		if (actionPlans.length == 0) {
+		var actionPlan = select(data, "//plato:preservationActionPlan").iterateNext(), jobreq;
+		if (actionPlan == null) {
 			finishProgress("exec_" + planId);
 			alert("Plan can not be executed, since it has no <preservationActionPlan> element");
 			return;
 		}
 		jobreq = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'
 			+ '<job-request xmlns="' + EXECNS + '">'
-			+ (new XMLSerializer()).serializeToString(actionPlans[0])
+			+ new XMLSerializer().serializeToString(actionPlan)
 			+ '<plan-id>' + planId + '</plan-id>'
 			+ '</job-request>';
 		$.ajax({
