@@ -38,6 +38,14 @@ function finishProgress(id) {
 	}
 	$("body").css("cursor", "default");
 }
+function select(context, xpath) {
+	var ns = {
+		'scape': 'http://scape-project.eu/model'
+	};
+	return document.evaluate(xpath, context, function(prefix) {
+		return ns[prefix] || null;
+	}, XPathResult.ANY_TYPE, null);
+}
 
 function executePlan(planId) {
 	startProgress("exec_" + planId);
@@ -163,14 +171,18 @@ function createPlanOverview() {
 		function de(state) {
 			return (state ? "ENABLED" : "DISABLED");
 		}
-		var numRecords = $(xml).filter(SCAPENODE('plan-data-collection')).attr('size'),
+		var numRecords = select(xml, "/scape:plan-data-collection/@size").iterateNext().value,
+			plans = select(xml, "/scape:plan-data-collection/scape:plan-data"),
 			aaData = new Array(),
 			count = 0;
 		$('#recordcount').text('Search returned ' + numRecords + ' plan(s)');
-		$(xml).find(SCAPENODE('plan-data')).each(function() {
+		while (true) {
+			var plan = plans.iterateNext();
+			if (!plan)
+				break;
 			var row = new Array(),
-				planId = $(this).find(SCAPENODE('identifier')).find(SCAPENODE('value')).first().text(),
-				state = ($(this).find(SCAPENODE('lifecycle-state')).attr('plan-state') == 'ENABLED'),
+				planId = select(plan, "//scape:identifier/scape:value").iterateNext().textContent,
+				state = (select(plan, "//scape:lifecycle-state/@plan-state").iterateNext().value == 'ENABLED'),
 				state_toggle_hint = (state ? 'Disable plan execution' : 'Enable plan execution'),
 				state_toggle = de(!state),
 				html_state = btn("toggle.png", state_toggle_hint,
@@ -179,11 +191,11 @@ function createPlanOverview() {
 				html_exec = btn("exec.png", "Execute plan", "executePlan('" + planId + "')", "exec_" + planId),
 				html_download = btn("download.png", "Download plan", "getPlan('"+planId+"')");
 			row[0] = planId;
-			row[1] = $(this).attr('title');
+			row[1] = select(plan, "//@title").iterateNext().value;
 			row[2] = de(state);
 			row[3] = html_download + (state ? html_exec : '') + html_state + html_del;
 			aaData[count++] = row;
-		});
+		}
 		$('#data_plan').dataTable({
 			aaData : aaData,
 			iDisplayLength : 25,
