@@ -102,7 +102,7 @@ function createPlanDetails() {
     document.title = 'Plan ' + id + ' - Plan Management';
     $.ajax({
     	type: "GET",
-    	url: planUri,
+    	url: planUri + "?noData=true",
     	data: {},
     	dataType: "text/xml",
     	success: function () {
