@@ -100,17 +100,8 @@ function createPlanDetails() {
     	id = $.getUrlVar('id'),
     	planUri = pmw_config.repository('plan', id); 
     document.title = 'Plan ' + id + ' - Plan Management';
-    $.ajax({
-    	type: "GET",
-    	url: planUri + "?noData=true",
-    	data: {},
-    	dataType: "text/xml",
-    	success: function () {
-    		alert('success');
-    	}
-    });
 
-	$.get(planUri).done(function(xml) {
+	$.get(planUri + "?noData=true").done(function(xml) {
 		var id = $.getUrlVar('id'), plan = $(xml).find('plan'), props = plan.find('properties'),
 			change = props.find('changelog'),
 			triggers = plan.find('basis').find('triggers'),
