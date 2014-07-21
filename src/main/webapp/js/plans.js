@@ -51,7 +51,7 @@ function executePlan(planId) {
 	startProgress("exec_" + planId);
 	var EXECNS = "http://www.scape-project.eu/api/execution";
 	// first get the plan
-	$.get(pmw_config.repository('plan', planId)).fail(function (data, stText, xhr) {
+	$.get(pmw_config.repository('plan', planId) + "?noData=true").fail(function (data, stText, xhr) {
 		finishProgress("exec_" + planId);
 		alert(stText);
 	}).done(function(data, stText, xhr) {
