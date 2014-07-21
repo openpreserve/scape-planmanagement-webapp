@@ -144,10 +144,6 @@ function createPlanDetails() {
 function createPlanOverview() {
 	startProgress();
 	$.get(pmw_config.repository('plan-list'), {}).done(function(xml) {
-		function SCAPENODE(name) {
-			// HACKTASTIC!
-			return "scape\\:" + name + ", ns1\\:" + name + ", " + name;
-		}
 		function btn(image, title, action, id) {
 			return $("<a>", {
 				title: title,
@@ -172,8 +168,8 @@ function createPlanOverview() {
 			if (!plan)
 				break;
 			var row = new Array(),
-				planId = select(plan, "//scape:identifier/scape:value").iterateNext().textContent,
-				state = (select(plan, "//scape:lifecycle-state/@plan-state").iterateNext().value == 'ENABLED'),
+				planId = select(plan, "scape:identifier/scape:value").iterateNext().textContent,
+				state = (select(plan, "scape:lifecycle-state/@plan-state").iterateNext().value == 'ENABLED'),
 				state_toggle_hint = (state ? 'Disable plan execution' : 'Enable plan execution'),
 				state_toggle = de(!state),
 				html_state = btn("toggle.png", state_toggle_hint,
@@ -182,7 +178,7 @@ function createPlanOverview() {
 				html_exec = btn("exec.png", "Execute plan", "executePlan('" + planId + "')", "exec_" + planId),
 				html_download = btn("download.png", "Download plan", "getPlan('"+planId+"')");
 			row[0] = planId;
-			row[1] = select(plan, "//@title").iterateNext().value;
+			row[1] = select(plan, "@title").iterateNext().value;
 			row[2] = de(state);
 			row[3] = html_download + (state ? html_exec : '') + html_state + html_del;
 			aaData[count++] = row;
