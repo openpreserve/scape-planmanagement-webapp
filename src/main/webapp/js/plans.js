@@ -147,7 +147,7 @@ function createPlanOverview() {
 	$.get(pmw_config.repository('plan-list'), {}).done(function(xml) {
 		function SCAPENODE(name) {
 			// HACKTASTIC!
-			return "scape\\:" + name + ", ns2\\:" + name + ", " + name;
+			return "scape\\:" + name + ", ns1\\:" + name + ", " + name;
 		}
 		function btn(image, title, action, id) {
 			return $("<a>", {
