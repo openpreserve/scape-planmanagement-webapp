@@ -75,7 +75,7 @@ function executePlan(planId, callback) {
 			dataType: "text",
 			contentType: "application/xml"
 		}).done(function (content, statusText, xhr) {
-			console.log("success", xhr.getAllResponseHeaders());
+			//console.log("success", xhr.getAllResponseHeaders());
 			if (xhr.status == 201) {
 				if (callback == null)
 					alert("execution platform started processing: Job ID = " + content);
@@ -85,7 +85,7 @@ function executePlan(planId, callback) {
 				alert("success at starting execution");
 			}
 		}).fail(function (xhr, statusText, error) {
-			console.log("fail", xhr.getAllResponseHeaders());
+			//console.log("fail", xhr.getAllResponseHeaders());
 			if (xhr.responseText != null)
 				alert(xhr.responseText);
 			else if (xhr.statusText != null)
