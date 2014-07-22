@@ -48,46 +48,50 @@ function select(context, xpath) {
 	}, XPathResult.ANY_TYPE, null);
 }
 
-function executePlan(planId) {
+function executePlan(planId, callback) {
 	startProgress("exec_" + planId);
 	var EXECNS = "http://www.scape-project.eu/api/execution";
 	// first get the plan
-	$.get(pmw_config.repository('plan', planId)).fail(function (data, stText, xhr) {
+	$.get(pmw_config.repository('plan', planId)+"?noData=true").fail(function (xhr, stText, err) {
 		finishProgress("exec_" + planId);
 		alert(stText);
 	}).done(function(data, stText, xhr) {
 		// now post the plan to the given execute URL
-		var actionPlan = select(data, "//plato:preservationActionPlan").iterateNext(), jobreq;
+		var actionPlan = select(data, "//plato:preservationActionPlan").iterateNext();
 		if (actionPlan == null) {
 			finishProgress("exec_" + planId);
 			alert("Plan can not be executed, since it has no <preservationActionPlan> element");
 			return;
 		}
-		jobreq = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'
-			+ '<job-request xmlns="' + EXECNS + '">'
-			+ new XMLSerializer().serializeToString(actionPlan)
-			+ '<plan-id>' + planId + '</plan-id>'
-			+ '</job-request>';
 		$.ajax({
 			url: pmw_config.executor(),
 			type: "POST",
-			data: jobreq,
-			dataType: "xml",
-			contentType: "application/xml",
-			success: function (content, statusText, xhr) {
-				if (xhr.status != 200) {
-					console.log(xhr.getAllResponseHeaders());
-				}
-				alert("success at starting execution");
-			},
-			error: function (xhr, statusText, error) {
-				if (xhr.responseText != null)
-					alert(xhr.responseText);
-				else if (xhr.statusText != null)
-					alert(xhr.statusText);
+			processData : false,
+			data: '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'
+				+ '<job-request xmlns="' + EXECNS + '">'
+				+ new XMLSerializer().serializeToString(actionPlan)
+				+ '<plan-id>' + planId + '</plan-id>'
+				+ '</job-request>',
+			dataType: "text",
+			contentType: "application/xml"
+		}).done(function (content, statusText, xhr) {
+			console.log("success", xhr.getAllResponseHeaders());
+			if (xhr.status == 201) {
+				if (callback == null)
+					alert("execution platform started processing: Job ID = " + content);
 				else
-					alert(error);
+					callback.call(xhr, content);
+			} else {
+				alert("success at starting execution");
 			}
+		}).fail(function (xhr, statusText, error) {
+			console.log("fail", xhr.getAllResponseHeaders());
+			if (xhr.responseText != null)
+				alert(xhr.responseText);
+			else if (xhr.statusText != null)
+				alert(xhr.statusText);
+			else
+				alert(error);
 		}).always(function(){
 			finishProgress("exec_" + planId);
 		});
@@ -103,6 +107,7 @@ function createPlanDetails() {
     document.title = 'Plan ' + id + ' - Plan Management';
 
 	$.get(planUri + "?noData=true").done(function(xml) {
+		// TODO Use XPath for parsing
 		var id = $.getUrlVar('id'), plan = $(xml).find('plan'), props = plan.find('properties'),
 			change = props.find('changelog'),
 			triggers = plan.find('basis').find('triggers'),
@@ -224,15 +229,15 @@ function setPlanState(planId, state) {
 	var url = pmw_config.repository('plan-state', planId, state);
 	$.ajax({
 		url: url,
+		processData : false,
 		type: 'PUT',
-		success: function () {
-			finishProgress();
-			window.location = window.location;
-		},
-		fail: function () {
-			finishProgress();
-			alert('HTTP PUT failed');
-		}
+		dataType: "text"
+	}).always(function(){
+		finishProgress();
+	}).done(function () {
+		window.location = window.location;
+	}).fail(function () {
+		alert('HTTP PUT failed');
 	});
 }
 
@@ -249,15 +254,14 @@ function deletePlan(planId) {
 	$.ajax({
 		url: pmw_config.repository('plan', planId),
 		type: 'DELETE',
-		success: function () {
-			finishProgress();
-			var loc = window.location.href;
-			window.location = loc.substring(0, loc.lastIndexOf('/')) + '/index.html';
-		},
-		fail: function () {
-			finishProgress();
-			alert('HTTP DELETE failed');
-		}
+		dataType: "text"
+	}).always(function() {
+		finishProgress();
+	}).done(function () {
+		var loc = window.location.href;
+		window.location = loc.substring(0, loc.lastIndexOf('/')) + '/index.html';
+	}).fail(function () {
+		alert('HTTP DELETE failed');
 	});
 }
 
@@ -276,18 +280,16 @@ function startUpload() {
 			url : url,
 			type : 'PUT',
 			data : data,
+			dataType: "text",
 			processData : false,
-			contentType : false,
-			success : function() {
-				finishProgress();
-				window.location = window.location;
-				return true;
-			},
-			error : function(xhr, stText, error) {
-				finishProgress();
-				alert('An error occured while uploading plan!\n' + stText
-						+ '\n\n' + xhr.statusText + '[' + xhr.status + ']');
-			}
+			contentType : false
+		}).always(function() {
+			finishProgress();
+		}).done(function() {
+			window.location = window.location;
+		}).fail(function(xhr, stText, error) {
+			alert('An error occured while uploading plan!\n' + stText
+					+ '\n\n' + xhr.statusText + '[' + xhr.status + ']');
 		});
 		return true;
 	};
