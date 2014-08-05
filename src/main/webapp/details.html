@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="css/cupertino/jquery-ui.min.css" />
 		<link id="executeService" href="execute" />
 		<link id="repositoryService" href="repository" />
+		<link id="workflowRenderer" href="wfrender" />
 		<script src="js/jquery-1.9.1.js"></script>
 		<script src="js/jquery-ui-1.10.3.custom.js"></script>
         <script type="text/javascript" src="js/plans.js"></script>
@@ -15,7 +16,7 @@
 	        	var id = $.getUrlVar('id');
 	        	createPlanDetails();
 	        	$('#menu_item_2').click(function() {
-	        			executePlan(id);
+	        		executePlan(id);
 	        	});
 	        	$('#plan_id').val(id);
 	        	$('#plan_btn').click(function () {
@@ -33,6 +34,9 @@
 	        	$('#execute_btn').click(function() {
 	        		executePlan(id);
 	        	});
+	        	$('#show_btn').click(function() {
+	        		renderPlan(id);
+	        	})
 	        });        
 		</script>
         <title></title>
@@ -88,27 +92,34 @@
 	    	</div>
 		    <div id="right_col">
 	    		<div class="action">
-	    			<h3 id="upload_title">Execute Plan</h3>
+	    			<h3 class="action_title">Show Plan Workflow</h3>
+					<input id="show_btn" type="button" value="Show"/>
+				</div>
+	    		<div class="action">
+	    			<h3 class="action_title">Execute Plan</h3>
 					<input id="execute_btn" type="button" value="Execute"/>
 				</div>
 	    		<div class="action">
-	    			<h3 id="upload_title">Enable/Disable Plan</h3>
+	    			<h3 class="action_title">Enable/Disable Plan</h3>
 					<input id="enable_btn" type="button" value="Enable"/>
 					<input id="disable_btn" type="button" value="Disable"/>
 				</div>
 	    		<div class="action">
-	    			<h3 id="upload_title">Update/Plan</h3>
+	    			<h3 class="action_title">Update/Plan</h3>
 					<input id="plan_id" name="planId" type="hidden"/>
 					<input id="plan_data" name="planData" type="file" /><br/>
 					<input id="plan_btn" type="button" value="Update"/>
 					<p id="upload_progress">Loading...<br/></p>
 				</div>
 	    		<div class="action">
-	    			<h3 id="upload_title">Delete Plan</h3>
+	    			<h3 class="action_title">Delete Plan</h3>
 					<input id="delete_btn" type="button" value="Delete"/>
 				</div>
 		    </div>
 	    </div>
 		<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>                 
+		<div id="workflowdialog" title="Contained Workflow">
+			<iframe id="workflowdialogcontent"></iframe>
+		</div>
     </body>
 </html>

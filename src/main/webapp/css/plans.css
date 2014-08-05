@@ -217,7 +217,7 @@ div#container {
 	border-radius: 10px;
 }
 
-#upload_title {
+.action_title {
 	color: #1d82a4;
 	font-size: 12pt;
 	font-weight: bold;
@@ -249,4 +249,12 @@ nav {
 	position:relative;
 	top: -180px;
 	left: -100px;
+}
+
+#workflowdialog {
+	display: none;
+}
+#workflowdialogcontent {
+	width: 500px;
+	height: 300px;
 }

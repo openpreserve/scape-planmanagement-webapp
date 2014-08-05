@@ -25,6 +25,16 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+	<servlet>
+		<display-name>SCAPE Workflow Renderer Delegate</display-name>
+		<servlet-name>wfrender-delegate</servlet-name>
+		<servlet-class>scape.support.DelegateServlet</servlet-class>
+		<init-param>
+			<param-name>config-prefix</param-name>
+			<param-value>wfrender</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>execution-delegate</servlet-name>
@@ -33,5 +43,9 @@
 	<servlet-mapping>
 		<servlet-name>repository-delegate</servlet-name>
 		<url-pattern>/repository/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>wfrender-delegate</servlet-name>
+		<url-pattern>/wfrender/*</url-pattern>
 	</servlet-mapping>
 </web-app>
