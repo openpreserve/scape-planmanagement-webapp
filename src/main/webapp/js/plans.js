@@ -21,6 +21,15 @@ var pmw_config = {
 	},
 	executor : function() {
 		return $("#executeService")[0].href;
+	},
+	workflowRender : function(opts) {
+		var url = $("#workflowRenderer")[0].href, sep = "?";
+		if (opts != null)
+			$.each(opts,function(k,v){
+				url += sep + encodeURIComponent(k) + "=" + encodeURIComponent(v);
+				sep = "&";
+			});
+		return url;
 	}
 };
 
@@ -48,6 +57,41 @@ function select(context, xpath) {
 	}, XPathResult.ANY_TYPE, null);
 }
 
+function renderPlan(planId) {
+	startProgress();
+	$.get(pmw_config.repository('plan', planId)+"?noData=true").fail(function(xhr, stText, err) {
+		finishProgress("exec_" + planId);
+		alert(stText);
+	}).done(function(data) {
+		$.ajax({
+			url: pmw_config.workflowRender({
+				width: 500
+			}),
+			type: "POST",
+			processData : false,
+			data: new XMLSerializer().serializeToString(select(data,
+					"//plato:preservationActionPlan/plato:executablePlan"
+					).iterateNext().firstElementChild),
+			dataType: "text",
+			processData: false,
+			contentType: "application/vnd.taverna.t2flow+xml",
+			accepts: { text: "text/html" }
+		}).always(function() {
+			finishProgress();
+		}).done(function(htmlcontent) {
+			setTimeout(function(){
+				$("#workflowdialogcontent")[0].contentWindow.document.write(htmlcontent);
+			}, 1);
+			$("#workflowdialog").dialog({
+		        resizable: false,
+		        width: 'auto',
+		        close: function() {
+		        	$("#workflowdialogcontent")[0].contentWindow.document.body.innerHTML = "";
+		        }
+			});
+		});
+	});
+}
 function executePlan(planId, callback) {
 	startProgress("exec_" + planId);
 	var EXECNS = "http://www.scape-project.eu/api/execution";
